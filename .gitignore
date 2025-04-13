@@ -13,9 +13,6 @@ __pycache__/
 .vscode/
 .idea/
 
-# Data files
-data/
-
 # Model files
 models/
 
