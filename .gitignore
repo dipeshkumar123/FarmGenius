@@ -1,0 +1,23 @@
+# Python virtual environment
+farmchatbot_env/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment variables
+.env
+
+# IDE specific files
+.vscode/
+.idea/
+
+# Data files
+data/
+
+# Model files
+models/
+
+# Logs
+*.log 
