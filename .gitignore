@@ -13,8 +13,5 @@ __pycache__/
 .vscode/
 .idea/
 
-# Model files
-models/
-
 # Logs
 *.log 
