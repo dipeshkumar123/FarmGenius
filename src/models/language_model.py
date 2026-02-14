@@ -2,7 +2,13 @@ import logging
 from typing import Dict, List, Optional, Any
 import json
 from pathlib import Path
-from googletrans import Translator
+
+try:
+    from deep_translator import GoogleTranslator
+    HAS_TRANSLATOR = True
+except Exception:
+    HAS_TRANSLATOR = False
+
 from langdetect import detect, detect_langs
 from langdetect.lang_detect_exception import LangDetectException
 
@@ -27,7 +33,11 @@ class LanguageModel:
         """
         self.data_dir = Path(data_dir)
         self.data_dir.mkdir(parents=True, exist_ok=True)
-        self.translator = Translator()
+        if HAS_TRANSLATOR:
+            self.translator_available = True
+        else:
+            self.translator_available = False
+            logger.warning("deep-translator not available – translation features disabled")
         self.supported_languages = {
             'en': 'English',
             'es': 'Spanish',
@@ -142,19 +152,23 @@ class LanguageModel:
             str: Translated text
         """
         try:
+            if not self.translator_available:
+                logger.warning("Translation not available, returning original text")
+                return text
+                
             # Check if translation exists in cache
             if target_lang in self.translations:
                 # TODO: Implement translation caching
                 pass
-                
-            # Use Google Translate
-            translation = self.translator.translate(
-                text,
-                dest=target_lang,
-                src=source_lang
-            )
             
-            return translation.text
+            # Use deep-translator (GoogleTranslator)
+            translator = GoogleTranslator(
+                source=source_lang or 'auto',
+                target=target_lang
+            )
+            translated = translator.translate(text)
+            
+            return translated if translated else text
             
         except Exception as e:
             logger.error(f"Error translating text: {str(e)}")

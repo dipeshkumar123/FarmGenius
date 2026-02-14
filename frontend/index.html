@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FarmGenius — Smart Agricultural Assistant</title>
+    <meta name="description" content="AI-powered farming assistant for crop recommendations, disease detection, weather forecasts, and market prices.">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/design-system.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/pages.css">
+    <link rel="stylesheet" href="css/animations.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌾</text></svg>">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loader-content">
+            <div class="leaf-spinner">
+                <div class="leaf leaf-1"><i class="fas fa-leaf"></i></div>
+                <div class="leaf leaf-2"><i class="fas fa-leaf"></i></div>
+                <div class="leaf leaf-3"><i class="fas fa-leaf"></i></div>
+            </div>
+            <h2 class="loader-title">FarmGenius</h2>
+            <p class="loader-subtitle">Growing smarter, together</p>
+            <div class="loader-bar"><div class="loader-bar-fill"></div></div>
+        </div>
+    </div>
+
+    <!-- App Container -->
+    <div id="app" class="app-container" style="opacity: 0;">
+        
+        <!-- Sidebar Navigation -->
+        <aside id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-seedling"></i>
+                    </div>
+                    <div class="logo-text">
+                        <h1>FarmGenius</h1>
+                        <span>Smart Farming AI</span>
+                    </div>
+                </div>
+                <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">
+                    <i class="fas fa-angles-left"></i>
+                </button>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <span class="nav-section-title">Main</span>
+                    <a href="#dashboard" class="nav-link active" data-page="dashboard">
+                        <i class="fas fa-th-large"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="#chat" class="nav-link" data-page="chat">
+                        <i class="fas fa-comments"></i>
+                        <span>AI Assistant</span>
+                        <span class="nav-badge">AI</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <span class="nav-section-title">Services</span>
+                    <a href="#crops" class="nav-link" data-page="crops">
+                        <i class="fas fa-wheat-awn"></i>
+                        <span>Crop Advisor</span>
+                    </a>
+                    <a href="#diseases" class="nav-link" data-page="diseases">
+                        <i class="fas fa-microscope"></i>
+                        <span>Disease Scanner</span>
+                    </a>
+                    <a href="#weather" class="nav-link" data-page="weather">
+                        <i class="fas fa-cloud-sun"></i>
+                        <span>Weather</span>
+                    </a>
+                    <a href="#prices" class="nav-link" data-page="prices">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Market Prices</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <span class="nav-section-title">Account</span>
+                    <a href="#history" class="nav-link" data-page="history">
+                        <i class="fas fa-clock-rotate-left"></i>
+                        <span>History</span>
+                    </a>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="api-status" id="api-status">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Checking...</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Top Bar -->
+            <header class="topbar">
+                <button id="mobile-menu-btn" class="mobile-menu-btn" aria-label="Open menu">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="topbar-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="global-search" placeholder="Ask anything about farming..." autocomplete="off">
+                </div>
+                <div class="topbar-actions">
+                    <div class="lang-selector" id="lang-selector" title="Select language">
+                        <i class="fas fa-globe"></i>
+                        <select id="lang-select">
+                            <option value="en">English</option>
+                            <option value="hi">हिन्दी</option>
+                            <option value="bn">বাংলা</option>
+                            <option value="es">Español</option>
+                            <option value="fr">Français</option>
+                            <option value="de">Deutsch</option>
+                            <option value="pt">Português</option>
+                            <option value="ar">العربية</option>
+                            <option value="ru">Русский</option>
+                            <option value="it">Italiano</option>
+                        </select>
+                    </div>
+                    <button class="topbar-btn" id="theme-toggle" title="Toggle theme">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <div class="user-avatar" title="Guest User">
+                        <i class="fas fa-user"></i>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Container -->
+            <div id="page-container" class="page-container">
+                <!-- Pages are rendered here dynamically -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Mobile Overlay -->
+    <div id="mobile-overlay" class="mobile-overlay"></div>
+
+    <!-- Scripts -->
+    <script src="js/api.js"></script>
+    <script src="js/router.js"></script>
+    <script src="js/components.js"></script>
+    <script src="js/pages/dashboard.js"></script>
+    <script src="js/pages/chat.js"></script>
+    <script src="js/pages/crops.js"></script>
+    <script src="js/pages/diseases.js"></script>
+    <script src="js/pages/weather.js"></script>
+    <script src="js/pages/prices.js"></script>
+    <script src="js/pages/history.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

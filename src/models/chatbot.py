@@ -399,7 +399,7 @@ class FarmChatbot:
             # Format response text
             response_text = f"The price of {commodity_info['commodity'].capitalize()} is "
             response_text += f"{price_data['price']} {price_data['currency']} per {price_data['unit']} "
-            response_text += f"on {price_data['date']} "
+            response_text += f"on {price_data['date']}. "
             response_text += "This information is based on real-time market data."
             
             return {
@@ -407,6 +407,7 @@ class FarmChatbot:
                 "confidence": 0.9,
                 "source": "price_model",
                 "intent": "price",
+                "found": True,
                 "price_data": price_data
             }
             
@@ -474,6 +475,7 @@ class FarmChatbot:
                 "confidence": top_crop['confidence'],
                 "source": "crop_model",
                 "intent": "crop",
+                "found": True,
                 "recommendations": recommendations
             }
             
@@ -539,6 +541,7 @@ class FarmChatbot:
                 "confidence": 0.9,
                 "source": "weather_model",
                 "intent": "weather",
+                "found": True,
                 "weather_data": weather_data
             }
             
@@ -552,43 +555,106 @@ class FarmChatbot:
             }
     
     def _get_disease_information(self, query):
-        """Get disease information from query."""
+        """Get disease information from query by searching the disease database."""
         try:
-            # Extract crop name if present
-            crop = None
-            crop_match = re.search(r'in\s+(\w+)', query.lower())
-            if crop_match:
-                crop = crop_match.group(1)
+            query_lower = query.lower()
             
             # Check if query contains image-related keywords
-            if any(word in query.lower() for word in ['image', 'picture', 'photo']):
+            if any(word in query_lower for word in ['image', 'picture', 'photo', 'upload']):
                 return {
-                    'success': False,
-                    'response_text': 'Please use the image upload endpoint to identify diseases from images.',
+                    'found': True,
+                    'response_text': 'Please use the Disease Detection page to upload an image for accurate disease identification.',
                     'intent': 'disease',
                     'confidence': 0.8,
                     'source': 'disease_model'
                 }
             
-            # For text queries, provide general guidance
-            response_text = (
-                "To identify plant diseases accurately, please upload a clear image of the affected plant part. "
-                "The system supports disease detection for the following crops: "
-                f"{', '.join(sorted(set(name.split()[0] for name in self.disease_model.class_names)))}"
-            )
+            # Search the disease database for matching diseases
+            matched_diseases = []
+            query_words = set(query_lower.split())
+            
+            for disease_name, disease_info in self.disease_model.disease_db.items():
+                name_lower = disease_name.lower()
+                crop_name = disease_info.get('crop', '').lower()
+                disease_words = set(name_lower.split())
+                
+                # Score-based matching
+                score = 0
+                
+                # High score: crop name matches
+                if crop_name and crop_name in query_lower:
+                    score += 3
+                
+                # High score: disease type keyword matches (e.g., "blight", "rust", "mosaic")
+                disease_type_words = disease_words - {crop_name}  # Words that aren't the crop name
+                for w in disease_type_words:
+                    if w in query_lower and len(w) > 3:
+                        score += 3
+                
+                # Medium score: disease name words appear in query
+                common_words = query_words & disease_words
+                significant_common = {w for w in common_words if len(w) > 3}
+                score += len(significant_common)
+                
+                if score >= 3:
+                    matched_diseases.append((score, disease_name, disease_info))
+            
+            # Sort by score descending and take top 5
+            matched_diseases.sort(key=lambda x: x[0], reverse=True)
+            matched_diseases = [(name, info) for _, name, info in matched_diseases[:5]]
+            
+            if matched_diseases:
+                response_parts = []
+                for disease_name, disease_info in matched_diseases:
+                    # Skip 'healthy' entries
+                    if 'healthy' in disease_name.lower():
+                        continue
+                    part = f"**{disease_name}** ({disease_info.get('type', 'Unknown type')})\n"
+                    part += f"Crop: {disease_info.get('crop', 'Unknown')}\n"
+                    symptoms = disease_info.get('symptoms', [])
+                    if symptoms:
+                        part += f"Symptoms: {', '.join(symptoms)}\n"
+                    treatments = disease_info.get('treatment', [])
+                    if treatments:
+                        part += f"Treatment: {', '.join(treatments)}"
+                    response_parts.append(part)
+                
+                if response_parts:
+                    response_text = "Here's what I found about plant diseases related to your query:\n\n"
+                    response_text += "\n\n".join(response_parts)
+                    response_text += "\n\nFor more accurate identification, you can upload an image on the Disease Detection page."
+                    
+                    return {
+                        'found': True,
+                        'response_text': response_text,
+                        'intent': 'disease',
+                        'confidence': 0.85,
+                        'source': 'disease_model'
+                    }
+            
+            # If no matches found, provide general guidance with available crops
+            try:
+                available_crops = sorted(set(name.split()[0] for name in self.disease_model.class_names))
+            except Exception:
+                available_crops = []
+            
+            response_text = "I couldn't find a specific disease matching your query. "
+            if available_crops:
+                response_text += f"The system supports disease detection for: {', '.join(available_crops)}. "
+            response_text += "For accurate identification, please upload a clear image of the affected plant on the Disease Detection page."
             
             return {
-                'success': True,
+                'found': True,
                 'response_text': response_text,
                 'intent': 'disease',
-                'confidence': 0.8,
+                'confidence': 0.6,
                 'source': 'disease_model'
             }
             
         except Exception as e:
             logger.error(f"Error getting disease information: {str(e)}")
             return {
-                'success': False,
+                'found': False,
                 'response_text': 'Error processing disease query. Please try again.',
                 'intent': 'disease',
                 'confidence': 0.0,
@@ -672,9 +738,21 @@ class FarmChatbot:
             elif intent == 'disease':
                 response = self._get_disease_information(query)
             
-            # If no response or low quality response, try DeepSeek
-            if not response or not response.get('found', False) or self._should_use_deepseek(response):
-                logger.info("Using DeepSeek model for response generation")
+            # If no response or error, try DeepSeek as fallback
+            # Only use DeepSeek for FAQ intent or when specialized models return errors
+            use_deepseek = False
+            if not response:
+                use_deepseek = True
+            elif not response.get('found', False):
+                use_deepseek = True
+            elif response.get('source') == 'error':
+                use_deepseek = True
+            elif intent == 'faq' and self._should_use_deepseek(response):
+                # Only apply DeepSeek quality check for FAQ responses
+                use_deepseek = True
+            
+            if use_deepseek:
+                logger.info(f"Using DeepSeek model for response generation (intent={intent})")
                 response = self.deepseek_model.generate_response(query, {
                     'intent': intent,
                     'preferences': preferences,

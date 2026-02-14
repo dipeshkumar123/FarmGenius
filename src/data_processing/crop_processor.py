@@ -29,8 +29,9 @@ class CropProcessor:
         missing_values = data.isnull().sum()
         logger.info(f"Missing values in crop data: {missing_values[missing_values > 0]}")
         
-        # Fill missing values if any
-        data = data.fillna(data.mean())
+        # Fill missing values if any (numeric columns only)
+        numeric_cols = data.select_dtypes(include=[np.number]).columns
+        data[numeric_cols] = data[numeric_cols].fillna(data[numeric_cols].mean())
         
         # Create copies for different processing needs
         processed_data = data.copy()

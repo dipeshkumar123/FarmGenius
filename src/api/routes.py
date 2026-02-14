@@ -195,6 +195,17 @@ class VoiceQueryResponse(BaseModel):
 class LanguageDetectionRequest(BaseModel):
     text: str
 
+class TranslateRequest(BaseModel):
+    text: str
+    target_lang: str
+    source_lang: Optional[str] = None
+
+class TranslateResponse(BaseModel):
+    translated_text: str
+    source_lang: str
+    target_lang: str
+    success: bool
+
 class DiseaseImageResponse(BaseModel):
     """Response model for disease image identification."""
     found: bool
@@ -1025,6 +1036,66 @@ async def detect_language(request: LanguageDetectionRequest):
         raise HTTPException(
             status_code=500,
             detail=f"Error detecting language: {str(e)}"
+        )
+
+@router.post("/translate", response_model=TranslateResponse, tags=["Language"])
+async def translate_text(request: TranslateRequest):
+    """
+    Translate text from one language to another.
+    
+    Parameters:
+    - text: Text to translate
+    - target_lang: Target language code (e.g., 'en', 'hi', 'es')
+    - source_lang: Optional source language code (auto-detected if not provided)
+    
+    Returns:
+    - Translated text
+    """
+    try:
+        if not chatbot.language_model:
+            raise HTTPException(
+                status_code=503,
+                detail="Translation service is not available"
+            )
+        
+        # Detect source language if not provided
+        source_lang = request.source_lang
+        if not source_lang:
+            detection = chatbot.language_model.detect_language(request.text)
+            source_lang = detection.get('detected_language', 'en')
+        
+        # If source and target are the same, return as-is
+        if source_lang == request.target_lang:
+            return TranslateResponse(
+                translated_text=request.text,
+                source_lang=source_lang,
+                target_lang=request.target_lang,
+                success=True
+            )
+        
+        # Translate
+        translated = chatbot.language_model.translate(
+            request.text,
+            target_lang=request.target_lang,
+            source_lang=source_lang
+        )
+        
+        return TranslateResponse(
+            translated_text=translated,
+            source_lang=source_lang,
+            target_lang=request.target_lang,
+            success=True
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error translating text: {str(e)}")
+        return TranslateResponse(
+            translated_text=request.text,
+            source_lang=request.source_lang or 'unknown',
+            target_lang=request.target_lang,
+            success=False
         )
 
 @router.post("/prices/trends", response_model=Dict[str, Any], tags=["Prices"])

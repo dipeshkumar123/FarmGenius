@@ -7,9 +7,15 @@ import speech_recognition as sr
 from gtts import gTTS
 import pygame
 import wave
-import pyaudio
 import numpy as np
 from dotenv import load_dotenv
+
+# PyAudio is optional - may not be available on all systems
+try:
+    import pyaudio
+    HAS_PYAUDIO = True
+except ImportError:
+    HAS_PYAUDIO = False
 
 # Configure logging
 logging.basicConfig(
@@ -35,7 +41,7 @@ class VoiceModel:
         
         # Audio settings
         self.chunk = 1024
-        self.format = pyaudio.paFloat32
+        self.format = pyaudio.paFloat32 if HAS_PYAUDIO else None
         self.channels = 1
         self.rate = 44100
         

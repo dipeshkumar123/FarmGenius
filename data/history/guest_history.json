@@ -1,0 +1,578 @@
+[
+    {
+        "timestamp": "2026-02-14T23:43:54.838659",
+        "query": "Image upload: download.jpg",
+        "response": {
+            "found": true,
+            "message": "Disease identification successful",
+            "results": [
+                {
+                    "name": "Cashew anthracnose",
+                    "confidence": 0.1901279240846634,
+                    "crop": "Cashew",
+                    "type": "Fungal",
+                    "severity": "low",
+                    "symptoms": [
+                        "Dark brown to black spots on leaves",
+                        "Circular or irregular lesions",
+                        "Premature leaf drop"
+                    ],
+                    "treatment": [
+                        "Remove infected plant parts",
+                        "Apply fungicide",
+                        "Improve air circulation"
+                    ]
+                },
+                {
+                    "name": "Cassava bacterial blight",
+                    "confidence": 0.1253974437713623,
+                    "crop": "Cassava",
+                    "type": "Bacterial",
+                    "severity": "low",
+                    "symptoms": [
+                        "Water-soaked lesions",
+                        "Leaf wilting",
+                        "Stem cankers"
+                    ],
+                    "treatment": [
+                        "Use disease-free cuttings",
+                        "Apply copper-based bactericide",
+                        "Crop rotation"
+                    ]
+                },
+                {
+                    "name": "Cassava brown spot",
+                    "confidence": 0.10925242304801941,
+                    "crop": "Cassava",
+                    "type": "Fungal",
+                    "severity": "low",
+                    "symptoms": [
+                        "Brown spots on leaves",
+                        "Leaf yellowing",
+                        "Reduced yield"
+                    ],
+                    "treatment": [
+                        "Remove infected leaves",
+                        "Apply fungicide",
+                        "Improve soil fertility"
+                    ]
+                },
+                {
+                    "name": "Tomato leaf blight",
+                    "confidence": 0.10923516005277634,
+                    "crop": "Tomato",
+                    "type": "Fungal",
+                    "severity": "low",
+                    "symptoms": [
+                        "Brown spots with yellow halos",
+                        "Leaf death",
+                        "Fruit rot"
+                    ],
+                    "treatment": [
+                        "Remove infected leaves",
+                        "Apply fungicide",
+                        "Improve air circulation"
+                    ]
+                },
+                {
+                    "name": "Tomato verticulium wilt",
+                    "confidence": 0.08809250593185425,
+                    "crop": "Tomato",
+                    "type": "Fungal",
+                    "severity": "low",
+                    "symptoms": [
+                        "Yellowing and wilting",
+                        "Brown vascular tissue",
+                        "Plant death"
+                    ],
+                    "treatment": [
+                        "Use resistant varieties",
+                        "Soil fumigation",
+                        "Crop rotation"
+                    ]
+                }
+            ]
+        },
+        "intent": "disease"
+    },
+    {
+        "timestamp": "2026-02-14T23:44:55.088825",
+        "query": "Image upload: download.jpg",
+        "response": {
+            "found": true,
+            "message": "Disease identification successful",
+            "results": [
+                {
+                    "name": "Cashew anthracnose",
+                    "confidence": 0.2843077480792999,
+                    "crop": "Cashew",
+                    "type": "Fungal",
+                    "severity": "low",
+                    "symptoms": [
+                        "Dark brown to black spots on leaves",
+                        "Circular or irregular lesions",
+                        "Premature leaf drop"
+                    ],
+                    "treatment": [
+                        "Remove infected plant parts",
+                        "Apply fungicide",
+                        "Improve air circulation"
+                    ]
+                },
+                {
+                    "name": "Cassava mosaic",
+                    "confidence": 0.22472338378429413,
+                    "crop": "Cassava",
+                    "type": "Viral",
+                    "severity": "low",
+                    "symptoms": [
+                        "Mosaic pattern on leaves",
+                        "Stunted growth",
+                        "Reduced yield"
+                    ],
+                    "treatment": [
+                        "Use virus-free planting material",
+                        "Control whiteflies",
+                        "Remove infected plants"
+                    ]
+                },
+                {
+                    "name": "Tomato leaf blight",
+                    "confidence": 0.09998144209384918,
+                    "crop": "Tomato",
+                    "type": "Fungal",
+                    "severity": "low",
+                    "symptoms": [
+                        "Brown spots with yellow halos",
+                        "Leaf death",
+                        "Fruit rot"
+                    ],
+                    "treatment": [
+                        "Remove infected leaves",
+                        "Apply fungicide",
+                        "Improve air circulation"
+                    ]
+                },
+                {
+                    "name": "Tomato septoria leaf spot",
+                    "confidence": 0.09472650289535522,
+                    "crop": "Tomato",
+                    "type": "Fungal",
+                    "severity": "low",
+                    "symptoms": [
+                        "Small brown spots with gray centers",
+                        "Leaf yellowing",
+                        "Defoliation"
+                    ],
+                    "treatment": [
+                        "Remove infected leaves",
+                        "Apply fungicide",
+                        "Improve air circulation"
+                    ]
+                },
+                {
+                    "name": "Tomato verticulium wilt",
+                    "confidence": 0.07513267546892166,
+                    "crop": "Tomato",
+                    "type": "Fungal",
+                    "severity": "low",
+                    "symptoms": [
+                        "Yellowing and wilting",
+                        "Brown vascular tissue",
+                        "Plant death"
+                    ],
+                    "treatment": [
+                        "Use resistant varieties",
+                        "Soil fumigation",
+                        "Crop rotation"
+                    ]
+                }
+            ]
+        },
+        "intent": "disease"
+    },
+    {
+        "timestamp": "2026-02-14T23:45:03.826585",
+        "query": "Image upload: download.jpg",
+        "response": {
+            "found": true,
+            "message": "Disease identification successful",
+            "results": [
+                {
+                    "name": "Cashew anthracnose",
+                    "confidence": 0.2843077480792999,
+                    "crop": "Cashew",
+                    "type": "Fungal",
+                    "severity": "low",
+                    "symptoms": [
+                        "Dark brown to black spots on leaves",
+                        "Circular or irregular lesions",
+                        "Premature leaf drop"
+                    ],
+                    "treatment": [
+                        "Remove infected plant parts",
+                        "Apply fungicide",
+                        "Improve air circulation"
+                    ]
+                },
+                {
+                    "name": "Cassava mosaic",
+                    "confidence": 0.22472338378429413,
+                    "crop": "Cassava",
+                    "type": "Viral",
+                    "severity": "low",
+                    "symptoms": [
+                        "Mosaic pattern on leaves",
+                        "Stunted growth",
+                        "Reduced yield"
+                    ],
+                    "treatment": [
+                        "Use virus-free planting material",
+                        "Control whiteflies",
+                        "Remove infected plants"
+                    ]
+                },
+                {
+                    "name": "Tomato leaf blight",
+                    "confidence": 0.09998144209384918,
+                    "crop": "Tomato",
+                    "type": "Fungal",
+                    "severity": "low",
+                    "symptoms": [
+                        "Brown spots with yellow halos",
+                        "Leaf death",
+                        "Fruit rot"
+                    ],
+                    "treatment": [
+                        "Remove infected leaves",
+                        "Apply fungicide",
+                        "Improve air circulation"
+                    ]
+                },
+                {
+                    "name": "Tomato septoria leaf spot",
+                    "confidence": 0.09472650289535522,
+                    "crop": "Tomato",
+                    "type": "Fungal",
+                    "severity": "low",
+                    "symptoms": [
+                        "Small brown spots with gray centers",
+                        "Leaf yellowing",
+                        "Defoliation"
+                    ],
+                    "treatment": [
+                        "Remove infected leaves",
+                        "Apply fungicide",
+                        "Improve air circulation"
+                    ]
+                },
+                {
+                    "name": "Tomato verticulium wilt",
+                    "confidence": 0.07513267546892166,
+                    "crop": "Tomato",
+                    "type": "Fungal",
+                    "severity": "low",
+                    "symptoms": [
+                        "Yellowing and wilting",
+                        "Brown vascular tissue",
+                        "Plant death"
+                    ],
+                    "treatment": [
+                        "Use resistant varieties",
+                        "Soil fumigation",
+                        "Crop rotation"
+                    ]
+                }
+            ]
+        },
+        "intent": "disease"
+    },
+    {
+        "timestamp": "2026-02-14T23:45:05.073266",
+        "query": "Image upload: download.jpg",
+        "response": {
+            "found": true,
+            "message": "Disease identification successful",
+            "results": [
+                {
+                    "name": "Cashew anthracnose",
+                    "confidence": 0.2843077480792999,
+                    "crop": "Cashew",
+                    "type": "Fungal",
+                    "severity": "low",
+                    "symptoms": [
+                        "Dark brown to black spots on leaves",
+                        "Circular or irregular lesions",
+                        "Premature leaf drop"
+                    ],
+                    "treatment": [
+                        "Remove infected plant parts",
+                        "Apply fungicide",
+                        "Improve air circulation"
+                    ]
+                },
+                {
+                    "name": "Cassava mosaic",
+                    "confidence": 0.22472338378429413,
+                    "crop": "Cassava",
+                    "type": "Viral",
+                    "severity": "low",
+                    "symptoms": [
+                        "Mosaic pattern on leaves",
+                        "Stunted growth",
+                        "Reduced yield"
+                    ],
+                    "treatment": [
+                        "Use virus-free planting material",
+                        "Control whiteflies",
+                        "Remove infected plants"
+                    ]
+                },
+                {
+                    "name": "Tomato leaf blight",
+                    "confidence": 0.09998144209384918,
+                    "crop": "Tomato",
+                    "type": "Fungal",
+                    "severity": "low",
+                    "symptoms": [
+                        "Brown spots with yellow halos",
+                        "Leaf death",
+                        "Fruit rot"
+                    ],
+                    "treatment": [
+                        "Remove infected leaves",
+                        "Apply fungicide",
+                        "Improve air circulation"
+                    ]
+                },
+                {
+                    "name": "Tomato septoria leaf spot",
+                    "confidence": 0.09472650289535522,
+                    "crop": "Tomato",
+                    "type": "Fungal",
+                    "severity": "low",
+                    "symptoms": [
+                        "Small brown spots with gray centers",
+                        "Leaf yellowing",
+                        "Defoliation"
+                    ],
+                    "treatment": [
+                        "Remove infected leaves",
+                        "Apply fungicide",
+                        "Improve air circulation"
+                    ]
+                },
+                {
+                    "name": "Tomato verticulium wilt",
+                    "confidence": 0.07513267546892166,
+                    "crop": "Tomato",
+                    "type": "Fungal",
+                    "severity": "low",
+                    "symptoms": [
+                        "Yellowing and wilting",
+                        "Brown vascular tissue",
+                        "Plant death"
+                    ],
+                    "treatment": [
+                        "Use resistant varieties",
+                        "Soil fumigation",
+                        "Crop rotation"
+                    ]
+                }
+            ]
+        },
+        "intent": "disease"
+    },
+    {
+        "timestamp": "2026-02-14T23:45:28.033665",
+        "query": "Image upload: download.jpg",
+        "response": {
+            "found": true,
+            "message": "Disease identification successful",
+            "results": [
+                {
+                    "name": "Cashew anthracnose",
+                    "confidence": 0.40758001804351807,
+                    "crop": "Cashew",
+                    "type": "Fungal",
+                    "severity": "low",
+                    "symptoms": [
+                        "Dark brown to black spots on leaves",
+                        "Circular or irregular lesions",
+                        "Premature leaf drop"
+                    ],
+                    "treatment": [
+                        "Remove infected plant parts",
+                        "Apply fungicide",
+                        "Improve air circulation"
+                    ]
+                },
+                {
+                    "name": "Maize leaf blight",
+                    "confidence": 0.2667568624019623,
+                    "crop": "Maize",
+                    "type": "Fungal",
+                    "severity": "low",
+                    "symptoms": [
+                        "Large brown lesions",
+                        "Leaf death",
+                        "Reduced yield"
+                    ],
+                    "treatment": [
+                        "Use resistant varieties",
+                        "Apply fungicide",
+                        "Crop rotation"
+                    ]
+                },
+                {
+                    "name": "Cassava mosaic",
+                    "confidence": 0.12504394352436066,
+                    "crop": "Cassava",
+                    "type": "Viral",
+                    "severity": "low",
+                    "symptoms": [
+                        "Mosaic pattern on leaves",
+                        "Stunted growth",
+                        "Reduced yield"
+                    ],
+                    "treatment": [
+                        "Use virus-free planting material",
+                        "Control whiteflies",
+                        "Remove infected plants"
+                    ]
+                },
+                {
+                    "name": "Cassava brown spot",
+                    "confidence": 0.042106591165065765,
+                    "crop": "Cassava",
+                    "type": "Fungal",
+                    "severity": "low",
+                    "symptoms": [
+                        "Brown spots on leaves",
+                        "Leaf yellowing",
+                        "Reduced yield"
+                    ],
+                    "treatment": [
+                        "Remove infected leaves",
+                        "Apply fungicide",
+                        "Improve soil fertility"
+                    ]
+                },
+                {
+                    "name": "Maize leaf spot",
+                    "confidence": 0.040716592222452164,
+                    "crop": "Maize",
+                    "type": "Fungal",
+                    "severity": "low",
+                    "symptoms": [
+                        "Small brown spots",
+                        "Leaf yellowing",
+                        "Premature death"
+                    ],
+                    "treatment": [
+                        "Remove infected leaves",
+                        "Apply fungicide",
+                        "Improve air circulation"
+                    ]
+                }
+            ]
+        },
+        "intent": "disease"
+    },
+    {
+        "timestamp": "2026-02-14T23:46:15.902518",
+        "query": "Image upload: download.jpg",
+        "response": {
+            "found": true,
+            "message": "Disease identification successful",
+            "results": [
+                {
+                    "name": "Tomato septoria leaf spot",
+                    "confidence": 0.403319776058197,
+                    "crop": "Tomato",
+                    "type": "Fungal",
+                    "severity": "low",
+                    "symptoms": [
+                        "Small brown spots with gray centers",
+                        "Leaf yellowing",
+                        "Defoliation"
+                    ],
+                    "treatment": [
+                        "Remove infected leaves",
+                        "Apply fungicide",
+                        "Improve air circulation"
+                    ]
+                },
+                {
+                    "name": "Tomato verticulium wilt",
+                    "confidence": 0.23830482363700867,
+                    "crop": "Tomato",
+                    "type": "Fungal",
+                    "severity": "low",
+                    "symptoms": [
+                        "Yellowing and wilting",
+                        "Brown vascular tissue",
+                        "Plant death"
+                    ],
+                    "treatment": [
+                        "Use resistant varieties",
+                        "Soil fumigation",
+                        "Crop rotation"
+                    ]
+                },
+                {
+                    "name": "Tomato leaf blight",
+                    "confidence": 0.11871351301670074,
+                    "crop": "Tomato",
+                    "type": "Fungal",
+                    "severity": "low",
+                    "symptoms": [
+                        "Brown spots with yellow halos",
+                        "Leaf death",
+                        "Fruit rot"
+                    ],
+                    "treatment": [
+                        "Remove infected leaves",
+                        "Apply fungicide",
+                        "Improve air circulation"
+                    ]
+                },
+                {
+                    "name": "Maize streak virus",
+                    "confidence": 0.05765976756811142,
+                    "crop": "Maize",
+                    "type": "Viral",
+                    "severity": "low",
+                    "symptoms": [
+                        "Yellow streaks on leaves",
+                        "Stunted growth",
+                        "Reduced yield"
+                    ],
+                    "treatment": [
+                        "Use resistant varieties",
+                        "Control leafhoppers",
+                        "Remove infected plants"
+                    ]
+                },
+                {
+                    "name": "Maize leaf spot",
+                    "confidence": 0.043264321982860565,
+                    "crop": "Maize",
+                    "type": "Fungal",
+                    "severity": "low",
+                    "symptoms": [
+                        "Small brown spots",
+                        "Leaf yellowing",
+                        "Premature death"
+                    ],
+                    "treatment": [
+                        "Remove infected leaves",
+                        "Apply fungicide",
+                        "Improve air circulation"
+                    ]
+                }
+            ]
+        },
+        "intent": "disease"
+    }
+]

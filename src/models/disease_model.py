@@ -12,13 +12,21 @@ from dotenv import load_dotenv
 import io
 import tensorflow as tf
 import keras
+from PIL import ImageFile as PILImageFile
+PILImageFile.LOAD_TRUNCATED_IMAGES = True
 from keras.models import Sequential, load_model, Model
 from keras.layers import Dense, Dropout, Flatten, Conv2D, MaxPooling2D, GlobalAveragePooling2D
-from keras.preprocessing.image import ImageDataGenerator
+try:
+    from keras.preprocessing.image import ImageDataGenerator
+except ImportError:
+    from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from keras.applications import MobileNetV2
 from keras.applications.mobilenet_v2 import preprocess_input
 from keras.callbacks import ModelCheckpoint, EarlyStopping
-from PIL import Image
+from PIL import Image, ImageFile
+
+# Allow loading truncated images to prevent training crashes
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 from src.utils.file_utils import get_project_root, ensure_directory_exists
 

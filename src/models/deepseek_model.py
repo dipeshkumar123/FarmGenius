@@ -31,13 +31,14 @@ class DeepSeekModel:
         self.api_url = api_url or os.getenv("DEEPSEEK_API_URL", "https://openrouter.ai/api/v1")
         self._validate_api_key()
         self.session = requests.Session()
-        self.session.headers.update({
-            "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/json",
-            "HTTP-Referer": "https://github.com/yourusername/FarmChatbot",  # Replace with your actual site URL
-            "X-Title": "FarmChatbot"  # Replace with your actual site name
-        })
-        logger.info("DeepSeek model initialized successfully")
+        if self.available:
+            self.session.headers.update({
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json",
+                "HTTP-Referer": "https://github.com/yourusername/FarmChatbot",
+                "X-Title": "FarmChatbot"
+            })
+        logger.info("DeepSeek model initialized successfully" if self.available else "DeepSeek model initialized in limited mode (no API key)")
         self.model = "deepseek/deepseek-chat"  # Updated model name for OpenRouter
         self.max_tokens = 1000
         self.temperature = 0.7
@@ -49,13 +50,14 @@ class DeepSeekModel:
     def _validate_api_key(self):
         """Validate the API key."""
         if not self.api_key:
-            logger.error("No OpenRouter API key provided. Please set DEEPSEEK_API_KEY environment variable.")
-            raise ValueError("OpenRouter API key is required")
+            logger.warning("No OpenRouter API key provided. DeepSeek model will not be available. Set DEEPSEEK_API_KEY environment variable to enable.")
+            self.available = False
         elif len(self.api_key) < 10:  # Basic validation
-            logger.error("Invalid OpenRouter API key format")
-            raise ValueError("Invalid OpenRouter API key format")
+            logger.warning("Invalid OpenRouter API key format. DeepSeek model will not be available.")
+            self.available = False
         else:
             logger.info("OpenRouter API key validated successfully")
+            self.available = True
             
     def _prepare_request(self, messages, temperature=0.7, max_tokens=1000):
         """Prepare the API request payload.

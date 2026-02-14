@@ -1,9 +1,11 @@
 import uvicorn
 import logging
 import os
+from pathlib import Path
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 from datetime import datetime
 
@@ -66,7 +68,11 @@ app.include_router(
 # Root endpoint
 @app.get("/", tags=["System"])
 async def root():
-    """Get API status and information."""
+    """Serve the frontend SPA."""
+    frontend_dir = Path(__file__).resolve().parent.parent.parent / "frontend"
+    index_file = frontend_dir / "index.html"
+    if index_file.exists():
+        return FileResponse(index_file)
     return {
         "status": "running",
         "version": "1.0.0",
@@ -77,6 +83,15 @@ async def root():
             "disease": "enabled"
         }
     }
+
+# Mount frontend static files (CSS, JS, assets)
+frontend_dir = Path(__file__).resolve().parent.parent.parent / "frontend"
+if frontend_dir.exists():
+    app.mount("/css", StaticFiles(directory=frontend_dir / "css"), name="css")
+    app.mount("/js", StaticFiles(directory=frontend_dir / "js"), name="js")
+    assets_dir = frontend_dir / "assets"
+    if assets_dir.exists():
+        app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
 
 # Error handler for all exceptions
 @app.exception_handler(Exception)
