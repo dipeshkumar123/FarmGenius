@@ -1,0 +1,6 @@
+{
+  "dharwad": {"lat": 15.45, "lon": 75.00},
+  "pune": {"lat": 18.52, "lon": 73.85},
+  "ludhiana": {"lat": 30.90, "lon": 75.85},
+  "bhopal": {"lat": 23.25, "lon": 77.41}
+}
