@@ -574,5 +574,101 @@
             ]
         },
         "intent": "disease"
+    },
+    {
+        "timestamp": "2026-02-21T00:38:52.941306",
+        "query": "Image upload: download.jpg",
+        "response": {
+            "found": true,
+            "message": "Disease identification successful",
+            "results": [
+                {
+                    "name": "Cassava mosaic",
+                    "confidence": 0.28110799193382263,
+                    "crop": "Cassava",
+                    "type": "Viral",
+                    "severity": "low",
+                    "symptoms": [
+                        "Mosaic pattern on leaves",
+                        "Stunted growth",
+                        "Reduced yield"
+                    ],
+                    "treatment": [
+                        "Use virus-free planting material",
+                        "Control whiteflies",
+                        "Remove infected plants"
+                    ]
+                },
+                {
+                    "name": "Cashew anthracnose",
+                    "confidence": 0.13550490140914917,
+                    "crop": "Cashew",
+                    "type": "Fungal",
+                    "severity": "low",
+                    "symptoms": [
+                        "Dark brown to black spots on leaves",
+                        "Circular or irregular lesions",
+                        "Premature leaf drop"
+                    ],
+                    "treatment": [
+                        "Remove infected plant parts",
+                        "Apply fungicide",
+                        "Improve air circulation"
+                    ]
+                },
+                {
+                    "name": "Cassava green mite",
+                    "confidence": 0.0635281428694725,
+                    "crop": "Cassava",
+                    "type": "Pest",
+                    "severity": "low",
+                    "symptoms": [
+                        "Leaf discoloration",
+                        "Stunted growth",
+                        "Reduced yield"
+                    ],
+                    "treatment": [
+                        "Apply acaricide",
+                        "Introduce natural predators",
+                        "Remove infested plants"
+                    ]
+                },
+                {
+                    "name": "Cashew leaf miner",
+                    "confidence": 0.06317103654146194,
+                    "crop": "Cashew",
+                    "type": "Pest",
+                    "severity": "low",
+                    "symptoms": [
+                        "Mining trails in leaves",
+                        "Leaf distortion",
+                        "Reduced photosynthesis"
+                    ],
+                    "treatment": [
+                        "Remove affected leaves",
+                        "Apply insecticide",
+                        "Use pheromone traps"
+                    ]
+                },
+                {
+                    "name": "Cashew red rust",
+                    "confidence": 0.05843839794397354,
+                    "crop": "Cashew",
+                    "type": "Fungal",
+                    "severity": "low",
+                    "symptoms": [
+                        "Reddish-brown spots",
+                        "Leaf yellowing",
+                        "Premature defoliation"
+                    ],
+                    "treatment": [
+                        "Fungicide application",
+                        "Remove infected leaves",
+                        "Improve drainage"
+                    ]
+                }
+            ]
+        },
+        "intent": "disease"
     }
 ]

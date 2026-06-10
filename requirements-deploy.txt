@@ -1,0 +1,39 @@
+# ============================================================
+# FarmGenius — Deployment requirements (Vercel / production)
+# Lightweight: no TensorFlow, no training deps
+# ============================================================
+
+# Web framework
+fastapi>=0.110.0
+uvicorn>=0.27.0
+python-dotenv>=1.0.0
+python-multipart>=0.0.9
+
+# ML inference (lightweight)
+onnxruntime>=1.17.0
+scikit-learn>=1.4.0
+numpy>=1.26.0
+pandas>=2.1.0
+
+# NLP / text
+langdetect>=1.0.9
+deep-translator>=1.11.0
+
+# Database
+sqlalchemy>=2.0.0
+psycopg2-binary>=2.9.0
+alembic>=1.13.0
+
+# Auth
+PyJWT>=2.8.0
+bcrypt>=4.0.0
+
+# Image processing
+Pillow>=10.0.0
+
+# HTTP client
+requests>=2.31.0
+httpx>=0.26.0
+
+# Data validation
+pydantic>=2.0.0

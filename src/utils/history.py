@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 async def save_to_history(user_id: str, query: str, response: Dict[str, Any], intent: str = None) -> bool:
     """
     Save a query and response to the user's conversation history.
+    Saves to both the database (primary) and JSON file (legacy fallback).
     
     Args:
         user_id (str): User identifier
@@ -25,20 +26,36 @@ async def save_to_history(user_id: str, query: str, response: Dict[str, Any], in
         bool: True if saved successfully, False otherwise
     """
     try:
-        # Create history directory if it doesn't exist
+        # Try database first
+        try:
+            from src.db.connection import SessionLocal
+            from src.db import crud as db_crud
+            db = SessionLocal()
+            try:
+                response_text = response.get('message', '') if isinstance(response, dict) else str(response)
+                db_crud.add_chat_entry(
+                    db,
+                    user_id=user_id,
+                    query=query,
+                    response=response_text,
+                    intent=intent,
+                )
+            finally:
+                db.close()
+        except Exception as db_err:
+            logger.warning(f"DB save failed, falling back to JSON: {db_err}")
+
+        # Also save to JSON file (legacy / backup)
         history_dir = os.path.join('data', 'history')
         os.makedirs(history_dir, exist_ok=True)
         
-        # Create user's history file path
         user_history_file = os.path.join(history_dir, f'{user_id}_history.json')
         
-        # Load existing history or create new
         history = []
         if os.path.exists(user_history_file):
             with open(user_history_file, 'r', encoding='utf-8') as f:
                 history = json.load(f)
         
-        # Add new entry
         entry = {
             'timestamp': datetime.now().isoformat(),
             'query': query,
@@ -47,7 +64,6 @@ async def save_to_history(user_id: str, query: str, response: Dict[str, Any], in
         }
         history.append(entry)
         
-        # Save updated history
         with open(user_history_file, 'w', encoding='utf-8') as f:
             json.dump(history, f, indent=4)
             

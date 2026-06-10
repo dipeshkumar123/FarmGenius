@@ -1,0 +1,18 @@
+[project]
+name = "farmgenius"
+version = "2.0.0"
+description = "AI-powered agricultural assistant with crop recommendations, disease detection, weather, and price analytics"
+requires-python = ">=3.12"
+readme = "README.md"
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W"]
+ignore = ["E501", "E402", "F401", "W291", "W293"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"

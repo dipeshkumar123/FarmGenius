@@ -1,0 +1,31 @@
+Tomato___Early_blight
+Tomato___Late_blight
+Tomato___Leaf_Mold
+Tomato___Septoria_leaf_spot
+Tomato___Spider_mites Two-spotted_spider_mite
+Tomato___Target_Spot
+Tomato___Tomato_Yellow_Leaf_Curl_Virus
+Tomato___Tomato_mosaic_virus
+Tomato___Healthy
+Potato___Early_blight
+Potato___Late_blight
+Potato___Healthy
+Rice___Brown_spot
+Rice___Hispa
+Rice___Leaf_Blast
+Rice___Healthy
+Wheat___Brown_rust
+Wheat___Yellow_rust
+Wheat___Healthy
+Cotton___Aphids
+Cotton___Army_worm
+Cotton___Bacterial_blight
+Cotton___Healthy
+Chickpea___Ascochyta_blight
+Chickpea___Fusarium_wilt
+Chickpea___Healthy
+Maize___Cercospora_leaf_spot Gray_leaf_spot
+Maize___Common_rust
+Maize___Northern_Leaf_Blight
+Maize___Healthy
+Unknown — please retake photo
