@@ -1,7 +1,30 @@
-import psycopg2
-import sys
+import os
 
-db_url = "postgresql://postgres:Postgres%40123@db.kwnnugqhuwacoeltaldq.supabase.co:5432/postgres"
+import psycopg2
+from psycopg2 import OperationalError
+from dotenv import load_dotenv
+
+
+load_dotenv()
+
+
+def _get_db_url() -> str:
+    candidates = [
+        os.getenv("DATABASE_URL"),
+        os.getenv("SUPABASE_DB_URL"),
+        os.getenv("SUPABASE_POOLER_URL"),
+    ]
+
+    for candidate in candidates:
+        if candidate:
+            return candidate
+
+    raise RuntimeError(
+        "No database connection string found. Set DATABASE_URL or SUPABASE_POOLER_URL in .env."
+    )
+
+
+db_url = _get_db_url()
 
 def run_setup():
     try:
@@ -167,6 +190,16 @@ INSERT INTO kvk_directory (district, state, phone_number, email, website) VALUES
         
         print("Database seeding completed successfully.")
         
+    except OperationalError as e:
+        message = str(e)
+        if "could not translate host name" in message:
+            print(
+                "Error: your DATABASE_URL points at a Supabase host that this machine cannot resolve or reach. "
+                "Use the exact Postgres connection string from Supabase Dashboard -> Settings -> Database -> Connection string, "
+                "or switch to the pooler host if your network does not support the direct database endpoint."
+            )
+        else:
+            print(f"Database error: {e}")
     except Exception as e:
         print(f"Error: {e}")
     finally:

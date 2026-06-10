@@ -3,6 +3,7 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     SUPABASE_URL: str
     SUPABASE_SERVICE_KEY: str
+    DATABASE_URL: str = ""
     GROQ_API_KEY: str
     DATA_GOV_IN_API_KEY: str = ""
     ENVIRONMENT: str = "production"
