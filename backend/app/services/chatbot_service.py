@@ -14,10 +14,10 @@ class ChatbotService:
         model_path = os.path.join(os.path.dirname(__file__), "..", "..", "models", "chatbot_farmer_v1.pkl")
         if os.path.exists(model_path):
             with open(model_path, "rb") as f:
-                data = pickle.load(f)
-                self.model = data.get("model")
-                self.vectorizer = data.get("vectorizer")
-                self.classes = data.get("classes", [])
+                pipeline = pickle.load(f)
+                self.model = pipeline.named_steps['clf']
+                self.vectorizer = pipeline.named_steps['tfidf']
+                self.classes = self.model.classes_
 
     def get_response(self, query: str, language: str, farmer_id: str) -> dict:
         confidence = 0.0
