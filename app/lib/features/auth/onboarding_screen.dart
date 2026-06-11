@@ -1,246 +1,278 @@
 import 'package:flutter/material.dart';
-import 'dart:ui';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../chat/voice_chat_screen.dart';
-import '../disease/disease_detect_screen.dart';
-import '../market/mandi_prices_screen.dart';
-import '../weather/weather_screen.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
-class OnboardingScreen extends StatelessWidget {
-  const OnboardingScreen({Key? key}) : super(key: key);
+class OnboardingScreen extends StatefulWidget {
+  const OnboardingScreen({super.key});
 
-  void _navigateTo(BuildContext context, Widget screen) {
-    Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
+  @override
+  State<OnboardingScreen> createState() => _OnboardingScreenState();
+}
+
+class _OnboardingScreenState extends State<OnboardingScreen> {
+  final PageController _pageController = PageController();
+  int _currentPage = 0;
+
+  final List<_OnboardingData> _slides = [
+    _OnboardingData(
+      icon: Icons.auto_awesome,
+      iconColor: const Color(0xFFFFC107),
+      gradientColors: [const Color(0xFFFFF8E1), const Color(0xFFFFECB3)],
+      title: 'Get Personalized\nCrop Advice',
+      subtitle:
+          'Tell the AI about your soil and location — get tailored recommendations for maximum yield.',
+    ),
+    _OnboardingData(
+      icon: Icons.camera_alt_rounded,
+      iconColor: const Color(0xFFEF6C00),
+      gradientColors: [const Color(0xFFFFF3E0), const Color(0xFFFFE0B2)],
+      title: 'Scan & Diagnose\nCrop Diseases',
+      subtitle:
+          'Point camera at a leaf. Get instant disease diagnosis + a step-by-step treatment plan.',
+    ),
+    _OnboardingData(
+      icon: Icons.trending_up_rounded,
+      iconColor: const Color(0xFF7B1FA2),
+      gradientColors: [const Color(0xFFF3E5F5), const Color(0xFFE1BEE7)],
+      title: 'Know When\nto Sell',
+      subtitle:
+          'Real-time mandi prices and AI-powered trend forecasts for your crops — sell at peak value.',
+    ),
+    _OnboardingData(
+      icon: Icons.record_voice_over_rounded,
+      iconColor: const Color(0xFF1565C0),
+      gradientColors: [const Color(0xFFE3F2FD), const Color(0xFFBBDEFB)],
+      title: 'Voice-First,\nAny Language',
+      subtitle:
+          'Ask questions in Hindi, Kannada, Telugu, Tamil — FarmGenius understands you perfectly.',
+    ),
+  ];
+
+  void _goToPage(int page) {
+    _pageController.animateToPage(
+      page,
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  void _nextOrFinish() {
+    if (_currentPage < _slides.length - 1) {
+      _goToPage(_currentPage + 1);
+    } else {
+      Navigator.pushReplacementNamed(context, '/home');
+    }
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAF8),
-      body: Stack(
-        children: [
-          // Background Decor
-          Positioned(
-            top: -100,
-            right: -100,
-            child: Container(
-              width: 300,
-              height: 300,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.green.withOpacity(0.15),
-              ),
+      backgroundColor: const Color(0xFFF1F8E9),
+      body: SafeArea(
+        child: Stack(
+          children: [
+            // ── Page content ────────────────────────────────────
+            PageView.builder(
+              controller: _pageController,
+              itemCount: _slides.length,
+              onPageChanged: (i) => setState(() => _currentPage = i),
+              itemBuilder: (context, index) {
+                return _OnboardingPage(data: _slides[index]);
+              },
             ),
-          ),
-          Positioned(
-            bottom: -50,
-            left: -50,
-            child: Container(
-              width: 200,
-              height: 200,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.lightGreen.withOpacity(0.1),
-              ),
-            ),
-          ),
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Header
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Good Morning,',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: Colors.grey[600],
-                                  fontWeight: FontWeight.w500,
-                                ),
-                          ).animate().fade().slideY(begin: -0.2),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Kisan Bhai 🌾',
-                            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: const Color(0xFF2E7D32),
-                                ),
-                          ).animate().fade().slideY(begin: -0.2, delay: 100.ms),
-                        ],
-                      ),
-                      CircleAvatar(
-                        radius: 28,
-                        backgroundColor: Colors.green[100],
-                        child: const Icon(Icons.person, color: Colors.green, size: 32),
-                      ).animate().scale(delay: 200.ms),
-                    ],
+
+            // ── Skip button ──────────────────────────────────────
+            Positioned(
+              top: 12,
+              right: 16,
+              child: TextButton(
+                onPressed: () =>
+                    Navigator.pushReplacementNamed(context, '/home'),
+                style: TextButton.styleFrom(
+                  foregroundColor: const Color(0xFF2E7D32),
+                  textStyle: GoogleFonts.poppins(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
                   ),
-                  const SizedBox(height: 32),
-                  
-                  // Weather / Quick Info Card
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF43A047), Color(0xFF2E7D32)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(24),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.green.withOpacity(0.3),
-                          blurRadius: 15,
-                          offset: const Offset(0, 8),
-                        ),
-                      ],
+                ),
+                child: const Text('Skip'),
+              ).animate().fadeIn(delay: 300.ms),
+            ),
+
+            // ── Bottom controls ──────────────────────────────────
+            Positioned(
+              bottom: 36,
+              left: 0,
+              right: 0,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Dot indicator
+                  SmoothPageIndicator(
+                    controller: _pageController,
+                    count: _slides.length,
+                    effect: WormEffect(
+                      dotWidth: 10,
+                      dotHeight: 10,
+                      spacing: 8,
+                      dotColor: Colors.grey.shade300,
+                      activeDotColor: const Color(0xFF2E7D32),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                  ),
+
+                  const SizedBox(height: 32),
+
+                  // Next / Get Started button
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 32),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      width: double.infinity,
+                      height: 56,
+                      child: ElevatedButton(
+                        onPressed: _nextOrFinish,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF2E7D32),
+                          foregroundColor: Colors.white,
+                          minimumSize: const Size(double.infinity, 56),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          elevation: 4,
+                          shadowColor:
+                              const Color(0xFF2E7D32).withValues(alpha: 0.4),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              'Sunny, 28°C',
-                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                              _currentPage == _slides.length - 1
+                                  ? 'Get Started'
+                                  : 'Next',
+                              style: GoogleFonts.poppins(
+                                fontSize: 17,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Perfect day for sowing!',
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: Colors.white70,
-                                  ),
-                            ),
+                            const SizedBox(width: 8),
+                            const Icon(Icons.arrow_forward_rounded, size: 20),
                           ],
                         ),
-                        const Icon(Icons.wb_sunny, color: Colors.amber, size: 48),
-                      ],
-                    ),
-                  ).animate().fade().slideX(begin: 0.2, delay: 300.ms),
-                  const SizedBox(height: 32),
-
-                  Text(
-                    'What would you like to do?',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ).animate().fade(delay: 400.ms),
-                  const SizedBox(height: 16),
-
-                  // Actions Grid
-                  Expanded(
-                    child: GridView.count(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
-                      childAspectRatio: 0.9,
-                      children: [
-                        _DashboardCard(
-                          title: 'Voice Assistant',
-                          icon: Icons.mic_rounded,
-                          color: Colors.blueAccent,
-                          onTap: () => _navigateTo(context, const VoiceChatScreen()),
-                        ).animate().fade().scale(delay: 500.ms),
-                        _DashboardCard(
-                          title: 'Crop Disease',
-                          icon: Icons.camera_alt_rounded,
-                          color: Colors.orangeAccent,
-                          onTap: () => _navigateTo(context, const DiseaseDetectScreen()),
-                        ).animate().fade().scale(delay: 600.ms),
-                        _DashboardCard(
-                          title: 'Mandi Prices',
-                          icon: Icons.storefront_rounded,
-                          color: Colors.purpleAccent,
-                          onTap: () => _navigateTo(context, const MandiPricesScreen()),
-                        ).animate().fade().scale(delay: 700.ms),
-                        _DashboardCard(
-                          title: 'Weather & Advisory',
-                          icon: Icons.cloud_rounded,
-                          color: Colors.lightBlue,
-                          onTap: () => _navigateTo(context, const WeatherScreen()),
-                        ).animate().fade().scale(delay: 800.ms),
-                      ],
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 }
 
-class _DashboardCard extends StatelessWidget {
-  final String title;
-  final IconData icon;
-  final Color color;
-  final VoidCallback onTap;
+// ─── Slide data model ────────────────────────────────────────────────────────
 
-  const _DashboardCard({
-    Key? key,
-    required this.title,
+class _OnboardingData {
+  final IconData icon;
+  final Color iconColor;
+  final List<Color> gradientColors;
+  final String title;
+  final String subtitle;
+
+  const _OnboardingData({
     required this.icon,
-    required this.color,
-    required this.onTap,
-  }) : super(key: key);
+    required this.iconColor,
+    required this.gradientColors,
+    required this.title,
+    required this.subtitle,
+  });
+}
+
+// ─── Single slide ────────────────────────────────────────────────────────────
+
+class _OnboardingPage extends StatelessWidget {
+  final _OnboardingData data;
+
+  const _OnboardingPage({required this.data});
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: Container(
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(32, 80, 32, 160),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Icon bubble
+          Container(
+            width: 160,
+            height: 160,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.8),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: Colors.white, width: 1.5),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: data.gradientColors,
+              ),
+              shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 5),
+                  color: data.iconColor.withValues(alpha: 0.25),
+                  blurRadius: 32,
+                  spreadRadius: 8,
+                  offset: const Offset(0, 8),
                 ),
               ],
             ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: color.withOpacity(0.15),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(icon, size: 36, color: color),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  title,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-              ],
+            child: Icon(
+              data.icon,
+              size: 80,
+              color: data.iconColor,
             ),
-          ),
-        ),
+          )
+              .animate()
+              .fadeIn(duration: 500.ms)
+              .slideY(begin: -0.15, curve: Curves.easeOut),
+
+          const SizedBox(height: 40),
+
+          // Title
+          Text(
+            data.title,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.poppins(
+              fontSize: 28,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF1B2B1D),
+              height: 1.25,
+            ),
+          )
+              .animate()
+              .fadeIn(delay: 100.ms, duration: 500.ms)
+              .slideX(begin: 0.1, curve: Curves.easeOut),
+
+          const SizedBox(height: 16),
+
+          // Subtitle
+          Text(
+            data.subtitle,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.notoSans(
+              fontSize: 16,
+              color: const Color(0xFF5A7A5C),
+              height: 1.5,
+            ),
+          )
+              .animate()
+              .fadeIn(delay: 200.ms, duration: 500.ms)
+              .slideX(begin: 0.1, curve: Curves.easeOut),
+        ],
       ),
     );
   }

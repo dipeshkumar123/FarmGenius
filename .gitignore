@@ -55,3 +55,4 @@ data/history/
 
 # Node modules
 node_modules/
+flutter_sdk/

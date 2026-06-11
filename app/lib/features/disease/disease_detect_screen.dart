@@ -1,251 +1,681 @@
-import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import 'tflite_service.dart';
+
+// ─── Screen ─────────────────────────────────────────────────────────────────
 
 class DiseaseDetectScreen extends StatefulWidget {
   const DiseaseDetectScreen({Key? key}) : super(key: key);
 
   @override
-  _DiseaseDetectScreenState createState() => _DiseaseDetectScreenState();
+  State<DiseaseDetectScreen> createState() => _DiseaseDetectScreenState();
 }
 
 class _DiseaseDetectScreenState extends State<DiseaseDetectScreen> {
-  File? _image;
-  String _result = '';
+  // ── Services ──
   final TFLiteService _tfliteService = TFLiteService();
+  final ImagePicker _picker = ImagePicker();
+
+  // ── State ──
+  File? _image;
   bool _isModelLoaded = false;
   bool _isAnalyzing = false;
 
+  // ── Result State ──
+  String? _diseaseName;
+  double? _confidence;
+  bool _isHealthy = false;
+
+  // ── Colours ──
+  static const _green = Color(0xFF2E7D32);
+  static const _bg = Color(0xFFF1F8E9);
+
+  // ─── Init ────────────────────────────────────────────────────────────────
   @override
   void initState() {
     super.initState();
-    _initModel();
+    _loadModel();
   }
-  
-  Future<void> _initModel() async {
+
+  Future<void> _loadModel() async {
     await _tfliteService.initModel();
-    setState(() => _isModelLoaded = true);
+    if (mounted) setState(() => _isModelLoaded = true);
   }
 
+  // ─── Picking ─────────────────────────────────────────────────────────────
   Future<void> _pickImage(ImageSource source) async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: source, imageQuality: 80);
-    
-    if (pickedFile != null) {
-      setState(() {
-        _image = File(pickedFile.path);
-        _isAnalyzing = true;
-        _result = '';
-      });
-      _analyzeImage(_image!);
-    }
-  }
-
-  Future<void> _analyzeImage(File image) async {
-    // Simulating delay for better UI perception if inference is too fast
-    await Future.delayed(const Duration(milliseconds: 1500));
-    final prediction = await _tfliteService.predict(image);
+    final picked = await _picker.pickImage(
+      source: source,
+      imageQuality: 85,
+      maxWidth: 1024,
+    );
+    if (picked == null) return;
     setState(() {
-      _result = prediction;
-      _isAnalyzing = false;
+      _image = File(picked.path);
+      _diseaseName = null;
+      _confidence = null;
+      _isHealthy = false;
     });
   }
 
+  // ─── Analysis ────────────────────────────────────────────────────────────
+  Future<void> _analyzeImage() async {
+    if (_image == null) return;
+    setState(() => _isAnalyzing = true);
+
+    // Deliberate short pause for perceptual smoothness
+    await Future.delayed(const Duration(milliseconds: 1600));
+
+    final raw = await _tfliteService.predict(_image!);
+    _parseResult(raw);
+
+    setState(() => _isAnalyzing = false);
+  }
+
+  /// Parse raw TFLiteService string e.g. "Tomato Early Blight\nConfidence: 87.3%"
+  void _parseResult(String raw) {
+    final lines = raw.split('\n');
+    final label = lines.isNotEmpty ? lines[0].trim() : raw.trim();
+    double conf = 0.85;
+
+    if (lines.length > 1) {
+      final confLine = lines[1]; // "Confidence: 87.3%"
+      final match = RegExp(r'([\d.]+)').firstMatch(confLine);
+      if (match != null) conf = double.parse(match.group(1)!) / 100.0;
+    }
+
+    setState(() {
+      _diseaseName = label;
+      _confidence = conf.clamp(0.0, 1.0);
+      _isHealthy = label.toLowerCase().contains('healthy');
+    });
+  }
+
+  // ─── Treatment Tips ───────────────────────────────────────────────────────
+  List<String> _getTreatmentTips(String diseaseName) {
+    final d = diseaseName.toLowerCase();
+    if (d.contains('healthy')) {
+      return [
+        'Your plant looks healthy! Keep up the good care.',
+        'Maintain proper irrigation and nutrient balance.',
+        'Monitor regularly to catch any early signs of stress.',
+      ];
+    }
+    if (d.contains('blight')) {
+      return [
+        'Remove and destroy affected leaves immediately.',
+        'Apply copper-based fungicide every 7–10 days.',
+        'Avoid overhead watering; water at soil level.',
+      ];
+    }
+    if (d.contains('rust')) {
+      return [
+        'Apply sulfur or mancozeb fungicide at first sign.',
+        'Ensure good air circulation between plants.',
+        'Rotate crops to break the disease cycle next season.',
+      ];
+    }
+    if (d.contains('mosaic') || d.contains('virus')) {
+      return [
+        'Remove and burn infected plants to prevent spread.',
+        'Control aphid populations with neem oil spray.',
+        'Use virus-resistant seed varieties next crop.',
+      ];
+    }
+    if (d.contains('spot')) {
+      return [
+        'Apply chlorothalonil or mancozeb fungicide weekly.',
+        'Collect and destroy fallen leaves from the field.',
+        'Contact your local KVK for specific dosage advice.',
+      ];
+    }
+    // Generic fallback
+    return [
+      'Isolate affected plants to prevent spread.',
+      'Consult a local KVK agronomist for certified treatment.',
+      'Document the symptoms and contact your state agriculture department.',
+    ];
+  }
+
+  // ─── Build ───────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAF8),
+      backgroundColor: _bg,
       appBar: AppBar(
-        title: const Text('Crop Doctor', style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.white,
-        foregroundColor: const Color(0xFF2E7D32),
+        foregroundColor: _green,
         elevation: 0,
-        centerTitle: true,
+        surfaceTintColor: Colors.white,
+        title: Text(
+          '🌿 Crop Doctor',
+          style: GoogleFonts.poppins(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            color: _green,
+          ),
+        ),
+        centerTitle: false,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_rounded),
+          onPressed: () => Navigator.of(context).maybePop(),
+        ),
       ),
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'Identify Crop Disease',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-                textAlign: TextAlign.center,
-              ).animate().fade().slideY(begin: -0.2),
-              const SizedBox(height: 8),
-              Text(
-                'Upload or take a photo of the affected leaf',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey[600],
-                ),
-                textAlign: TextAlign.center,
-              ).animate().fade().slideY(begin: -0.2, delay: 100.ms),
-              const SizedBox(height: 32),
+        physics: const BouncingScrollPhysics(),
+        child: Column(
+          children: [
+            _buildImageCard(),
+            _buildActionButtons(),
+            _buildInstructionsCard(),
+            if (_image != null && _diseaseName == null && !_isAnalyzing)
+              _buildAnalyzeButton(),
+            if (_diseaseName != null && !_isAnalyzing)
+              _buildResultCard()
+                  .animate()
+                  .slideY(begin: 0.4, duration: 500.ms, curve: Curves.easeOut)
+                  .fadeIn(duration: 400.ms),
+            const SizedBox(height: 40),
+          ],
+        ),
+      ),
+    );
+  }
 
-              // Image Card
-              GestureDetector(
-                onTap: () => _pickImage(ImageSource.camera),
-                child: Container(
-                  height: 300,
-                  decoration: BoxDecoration(
+  // ─── Image Preview Card ───────────────────────────────────────────────────
+  Widget _buildImageCard() {
+    return GestureDetector(
+      onTap: _image == null
+          ? () => _pickImage(ImageSource.camera)
+          : null,
+      child: Container(
+        height: 280,
+        margin: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: _image == null
+                ? const Color(0xFF60AD5E).withValues(alpha: 0.45)
+                : Colors.transparent,
+            width: 2,
+            // Dashed border via custom paint on empty state
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.06),
+              blurRadius: 14,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: _image == null ? _buildEmptyImageState() : _buildImageState(),
+      ),
+    ).animate().fadeIn(delay: 100.ms).scale(begin: const Offset(0.96, 0.96));
+  }
+
+  Widget _buildEmptyImageState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.add_photo_alternate_outlined,
+            size: 80,
+            color: const Color(0xFF60AD5E),
+          )
+              .animate(onPlay: (c) => c.repeat(reverse: true))
+              .scaleXY(
+                begin: 1.0,
+                end: 1.08,
+                duration: 1800.ms,
+                curve: Curves.easeInOut,
+              ),
+          const SizedBox(height: 16),
+          Text(
+            'Tap to scan a leaf',
+            style: GoogleFonts.poppins(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: const Color(0xFF546E7A),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Works offline • No internet needed',
+            style: GoogleFonts.poppins(
+              fontSize: 12,
+              color: Colors.grey[500],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildImageState() {
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Image.file(_image!, fit: BoxFit.cover),
+          ),
+        ),
+        if (_isAnalyzing)
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.55),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const CircularProgressIndicator(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(32),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
+                    strokeWidth: 3,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Analyzing...',
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  )
+                      .animate(onPlay: (c) => c.repeat())
+                      .shimmer(
+                        duration: 1200.ms,
+                        color: Colors.white.withValues(alpha: 0.6),
                       ),
-                    ],
-                    border: Border.all(
-                      color: _image == null ? Colors.green.withOpacity(0.3) : Colors.transparent,
-                      width: 2,
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  // ─── Camera / Gallery Buttons ─────────────────────────────────────────────
+  Widget _buildActionButtons() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+      child: Row(
+        children: [
+          Expanded(
+            child: _ActionBtn(
+              icon: Icons.camera_alt_rounded,
+              label: 'Camera',
+              onPressed: _isModelLoaded
+                  ? () => _pickImage(ImageSource.camera)
+                  : null,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: _ActionBtn(
+              icon: Icons.photo_library_rounded,
+              label: 'Gallery',
+              onPressed: _isModelLoaded
+                  ? () => _pickImage(ImageSource.gallery)
+                  : null,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ─── Instructions Card ────────────────────────────────────────────────────
+  Widget _buildInstructionsCard() {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: const Border(
+          left: BorderSide(color: Color(0xFF2E7D32), width: 3),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '📋 How to get best results',
+            style: GoogleFonts.poppins(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF1B2B1D),
+            ),
+          ),
+          const SizedBox(height: 10),
+          ...[
+            'Use natural light',
+            'Focus on one leaf',
+            'Show visible symptoms',
+          ].map(
+            (tip) => Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Row(
+                children: [
+                  const Icon(Icons.check_circle_rounded,
+                      color: Color(0xFF43A047), size: 18),
+                  const SizedBox(width: 8),
+                  Text(
+                    tip,
+                    style: GoogleFonts.poppins(
+                      fontSize: 13,
+                      color: Colors.grey[700],
                     ),
                   ),
-                  clipBehavior: Clip.antiAlias,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      if (_image == null)
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(24),
-                              decoration: BoxDecoration(
-                                color: Colors.green.withOpacity(0.1),
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.add_a_photo_rounded,
-                                size: 64,
-                                color: Color(0xFF2E7D32),
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            const Text(
-                              'Tap to open camera',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.green,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        )
-                      else
-                        Positioned.fill(
-                          child: Image.file(_image!, fit: BoxFit.cover),
-                        ),
-                      if (_isAnalyzing)
-                        Container(
-                          color: Colors.black54,
-                          child: Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const CircularProgressIndicator(color: Colors.white),
-                                const SizedBox(height: 16),
-                                const Text(
-                                  'Analyzing locally...',
-                                  style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-                                ).animate(onPlay: (controller) => controller.repeat()).shimmer(duration: 1.seconds),
-                              ],
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ).animate().fade().scale(delay: 200.ms),
-              const SizedBox(height: 32),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    ).animate().fadeIn(delay: 200.ms);
+  }
 
-              // Action Buttons
-              if (!_isAnalyzing && _result.isEmpty)
-                Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: _isModelLoaded ? () => _pickImage(ImageSource.camera) : null,
-                        icon: const Icon(Icons.camera_alt),
-                        label: const Text('Camera'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF2E7D32),
-                          foregroundColor: Colors.white,
-                        ),
-                      ),
-                    ).animate().fade().slideX(begin: -0.2, delay: 300.ms),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: _isModelLoaded ? () => _pickImage(ImageSource.gallery) : null,
-                        icon: const Icon(Icons.photo_library),
-                        label: const Text('Gallery'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: const Color(0xFF2E7D32),
-                          side: const BorderSide(color: Color(0xFF2E7D32)),
-                        ),
-                      ),
-                    ).animate().fade().slideX(begin: 0.2, delay: 300.ms),
-                  ],
+  // ─── Analyze Button ───────────────────────────────────────────────────────
+  Widget _buildAnalyzeButton() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      child: SizedBox(
+        height: 52,
+        width: double.infinity,
+        child: ElevatedButton(
+          onPressed: _analyzeImage,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: _green,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14)),
+            elevation: 2,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text('🔬', style: TextStyle(fontSize: 18)),
+              const SizedBox(width: 8),
+              Text(
+                'Analyze Disease',
+                style: GoogleFonts.poppins(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
                 ),
-
-              // Result Display
-              if (_result.isNotEmpty && !_isAnalyzing)
-                Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF43A047), Color(0xFF2E7D32)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(24),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.green.withOpacity(0.3),
-                        blurRadius: 15,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      const Icon(Icons.check_circle_outline, color: Colors.white, size: 48)
-                          .animate()
-                          .scale(duration: 400.ms, curve: Curves.easeOutBack),
-                      const SizedBox(height: 16),
-                      const Text(
-                        'Diagnosis Complete',
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 1.2,
-                        ),
-                      ).animate().fade(delay: 200.ms),
-                      const SizedBox(height: 8),
-                      Text(
-                        _result,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.center,
-                      ).animate().fade(delay: 300.ms).slideY(begin: 0.2),
-                    ],
-                  ),
-                ).animate().fade().slideY(begin: 0.2),
+              ),
             ],
           ),
+        ),
+      )
+          .animate()
+          .fadeIn(duration: 350.ms)
+          .slideY(begin: 0.2),
+    );
+  }
+
+  // ─── Result Card ──────────────────────────────────────────────────────────
+  Widget _buildResultCard() {
+    final conf = _confidence ?? 0.85;
+    final disease = _diseaseName ?? 'Unknown';
+    final tips = _getTreatmentTips(disease);
+    final confColor = conf >= 0.80
+        ? const Color(0xFF43A047)
+        : conf >= 0.60
+            ? Colors.orange
+            : Colors.red;
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ── Header ──
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+            child: Row(
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: (_isHealthy
+                            ? const Color(0xFF43A047)
+                            : Colors.red.shade400)
+                        .withValues(alpha: 0.12),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    _isHealthy
+                        ? Icons.check_circle_rounded
+                        : Icons.coronavirus_rounded,
+                    color: _isHealthy
+                        ? const Color(0xFF43A047)
+                        : Colors.red.shade400,
+                    size: 28,
+                  ),
+                )
+                    .animate()
+                    .scale(
+                      begin: const Offset(0.5, 0.5),
+                      duration: 400.ms,
+                      curve: Curves.easeOutBack,
+                    ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Text(
+                    disease,
+                    style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFF1B2B1D),
+                      height: 1.2,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // ── Confidence bar ──
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Confidence',
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        color: Colors.grey[600],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    Text(
+                      '${(conf * 100).toInt()}% match',
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        color: confColor,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: LinearProgressIndicator(
+                    value: conf,
+                    minHeight: 8,
+                    backgroundColor: Colors.grey[200],
+                    valueColor:
+                        AlwaysStoppedAnimation<Color>(confColor),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const Divider(height: 28, indent: 20, endIndent: 20),
+
+          // ── Treatment ──
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+            child: Text(
+              'What to do:',
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF1B2B1D),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          ...tips.asMap().entries.map(
+            (entry) => Padding(
+              padding: const EdgeInsets.fromLTRB(12, 0, 20, 6),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.arrow_right_rounded,
+                      color: _green, size: 22),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      entry.value,
+                      style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        color: Colors.grey[800],
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            )
+                .animate(delay: (entry.key * 80).ms)
+                .fadeIn()
+                .slideX(begin: -0.1),
+          ),
+
+          // ── Actions ──
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+            child: Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      // Navigate to chat screen with disease query
+                    },
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: _green,
+                      side: const BorderSide(color: _green),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    child: Text(
+                      'Ask AI →',
+                      style: GoogleFonts.poppins(
+                          fontWeight: FontWeight.w600, fontSize: 13),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      // Could open a details/wiki page
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _green,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      elevation: 0,
+                    ),
+                    child: Text(
+                      'Learn More',
+                      style: GoogleFonts.poppins(
+                          fontWeight: FontWeight.w600, fontSize: 13),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Action Button Widget ─────────────────────────────────────────────────────
+
+class _ActionBtn extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback? onPressed;
+
+  const _ActionBtn({
+    required this.icon,
+    required this.label,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 52,
+      child: OutlinedButton.icon(
+        onPressed: onPressed,
+        icon: Icon(icon, size: 20),
+        label: Text(
+          label,
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.w600,
+            fontSize: 14,
+          ),
+        ),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: const Color(0xFF2E7D32),
+          side: const BorderSide(color: Color(0xFF2E7D32), width: 1.5),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          backgroundColor: Colors.white,
         ),
       ),
     );

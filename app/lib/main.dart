@@ -1,53 +1,103 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'core/storage/offline_manager.dart';
+import 'core/theme/app_theme.dart';
+import 'features/auth/splash_screen.dart';
 import 'features/auth/onboarding_screen.dart';
+import 'features/home/home_screen.dart';
+import 'features/chat/voice_chat_screen.dart';
+import 'features/disease/disease_detect_screen.dart';
+import 'features/market/mandi_prices_screen.dart';
+import 'features/weather/weather_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // Initialize Offline Storage (Hive)
-  await Hive.initFlutter();
+
+  // Lock to portrait orientation — farming app is portrait-first.
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
+  // Set system UI overlay style to match our green-on-white brand.
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+      systemNavigationBarColor: Colors.white,
+      systemNavigationBarIconBrightness: Brightness.dark,
+    ),
+  );
+
+  // Initialise offline storage (Hive).
+  // OfflineManager.init() calls Hive.initFlutter() internally, then
+  // opens all required boxes — no direct Hive call needed here.
   await OfflineManager.init();
-  
-  runApp(const ProviderScope(child: FarmGeniusApp()));
+
+  runApp(
+    // Riverpod scope wraps the entire widget tree.
+    const ProviderScope(child: FarmGeniusApp()),
+  );
 }
 
 class FarmGeniusApp extends StatelessWidget {
-  const FarmGeniusApp({Key? key}) : super(key: key);
+  const FarmGeniusApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'FarmGenius',
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF2E7D32), // Vibrant green
-          brightness: Brightness.light,
-          background: const Color(0xFFF8FAF8), // Clean light background
-          surface: Colors.white,
-        ),
-        textTheme: GoogleFonts.poppinsTextTheme(
-          Theme.of(context).textTheme,
-        ).copyWith(
-          bodyLarge: GoogleFonts.poppins(fontSize: 22, fontWeight: FontWeight.bold),
-          bodyMedium: GoogleFonts.poppins(fontSize: 18),
-        ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            minimumSize: const Size(double.infinity, 60),
-            textStyle: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-          ),
-        ),
-      ),
-      home: const OnboardingScreen(),
       debugShowCheckedModeBanner: false,
+
+      // ── Brand theme (Material 3, Poppins + Noto Sans) ──────────────────
+      theme: AppTheme.light,
+
+      // ── Named route table ──────────────────────────────────────────────
+      // Simple named-route navigation — clean, no extra packages needed
+      // at this stage. GoRouter can replace this in a future iteration.
+      initialRoute: '/splash',
+      routes: {
+        '/splash':   (_) => const SplashScreen(),
+        '/onboarding': (_) => const OnboardingScreen(),
+        '/home':     (_) => const HomeScreen(),
+        '/chat':     (_) => const VoiceChatScreen(),
+        '/scan':     (_) => const DiseaseDetectScreen(),
+        '/market':   (_) => const MandiPricesScreen(),
+        '/weather':  (_) => const WeatherScreen(),
+      },
+
+      // Custom page transition — subtle fade for a polished feel.
+      onGenerateRoute: (settings) {
+        final routes = {
+          '/splash':     const SplashScreen(),
+          '/onboarding': const OnboardingScreen(),
+          '/home':       const HomeScreen(),
+          '/chat':       const VoiceChatScreen(),
+          '/scan':       const DiseaseDetectScreen(),
+          '/market':     const MandiPricesScreen(),
+          '/weather':    const WeatherScreen(),
+        };
+
+        final page = routes[settings.name];
+        if (page == null) return null;
+
+        return PageRouteBuilder(
+          settings: settings,
+          pageBuilder: (_, __, ___) => page,
+          transitionsBuilder: (_, animation, __, child) {
+            return FadeTransition(
+              opacity: CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeInOut,
+              ),
+              child: child,
+            );
+          },
+          transitionDuration: const Duration(milliseconds: 250),
+        );
+      },
     );
   }
 }
