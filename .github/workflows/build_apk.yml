@@ -32,9 +32,8 @@ jobs:
         run: |
           flutter create .
           sed -i '/android {/a \    aaptOptions {\n        noCompress "tflite"\n    }' android/app/build.gradle
-          sed -i 's/minSdkVersion flutter.minSdkVersion/minSdkVersion 21/g' android/app/build.gradle
-          sed -i 's/minSdkVersion 16/minSdkVersion 21/g' android/app/build.gradle
-          sed -i 's/minSdkVersion 19/minSdkVersion 21/g' android/app/build.gradle
+          sed -i -e 's/minSdkVersion .*/minSdkVersion 21/g' android/app/build.gradle
+          echo "flutter.minSdkVersion=21" >> android/local.properties
         working-directory: ./app
 
       - name: Install Dependencies
