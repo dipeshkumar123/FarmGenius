@@ -5,7 +5,7 @@ class ApiService {
   
   ApiService() {
     _dio = Dio(BaseOptions(
-      baseUrl: 'https://farmgenius-backend.onrender.com', // Replace with dynamic env config later
+      baseUrl: 'https://pagodalike-dannielle-stageably.ngrok-free.dev', // Tunneling to local port 8000
       connectTimeout: const Duration(seconds: 30), // Extended for 2G
       receiveTimeout: const Duration(seconds: 30),
     ));
