@@ -33,7 +33,7 @@ class AppTheme {
       error: AppColors.error,
       surface: AppColors.surface,
       onSurface: AppColors.textPrimary,
-      surfaceContainerHighest: AppColors.surfaceVariant,
+      surfaceVariant: AppColors.surfaceVariant,
       onSurfaceVariant: AppColors.textSecondary,
     );
 
@@ -49,7 +49,7 @@ class AppTheme {
       textTheme: _buildTextTheme(),
 
       // ── Card ──────────────────────────────────────────────────────────
-      cardTheme: CardThemeData(
+      cardTheme: CardTheme(
         elevation: 0,
         color: AppColors.surface,
         shape: RoundedRectangleBorder(
@@ -118,8 +118,8 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: AppColors.textOnPrimary,
-          disabledBackgroundColor: AppColors.primaryLight.withValues(alpha: 0.4),
-          disabledForegroundColor: AppColors.textOnPrimary.withValues(alpha: 0.6),
+          disabledBackgroundColor: AppColors.primaryLight.withOpacity(0.4),
+          disabledForegroundColor: AppColors.textOnPrimary.withOpacity(0.6),
           elevation: 0,
           shadowColor: Colors.transparent,
           minimumSize: const Size.fromHeight(52),
@@ -176,7 +176,7 @@ class AppTheme {
       // ── Chip ──────────────────────────────────────────────────────────
       chipTheme: ChipThemeData(
         backgroundColor: AppColors.surfaceVariant,
-        selectedColor: AppColors.primaryLight.withValues(alpha: 0.3),
+        selectedColor: AppColors.primaryLight.withOpacity(0.3),
         labelStyle: GoogleFonts.notoSans(
           fontSize: 13,
           color: AppColors.textPrimary,

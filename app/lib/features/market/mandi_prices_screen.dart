@@ -156,7 +156,7 @@ class _SearchBar extends StatelessWidget {
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF2E7D32).withValues(alpha: 0.12),
+            color: const Color(0xFF2E7D32).withOpacity(0.12),
             blurRadius: 16,
             offset: const Offset(0, 4),
           ),
@@ -236,7 +236,7 @@ class _CategoryChips extends StatelessWidget {
                 boxShadow: isSelected
                     ? [
                         BoxShadow(
-                          color: const Color(0xFF2E7D32).withValues(alpha: 0.30),
+                          color: const Color(0xFF2E7D32).withOpacity(0.30),
                           blurRadius: 8,
                           offset: const Offset(0, 3),
                         )
@@ -298,7 +298,7 @@ class _PriceCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF1B5E20).withValues(alpha: 0.08),
+            color: const Color(0xFF1B5E20).withOpacity(0.08),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),

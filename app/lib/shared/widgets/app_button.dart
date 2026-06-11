@@ -47,7 +47,7 @@ class AppButton extends StatelessWidget {
         onPressed: isDisabled ? null : onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
-          disabledBackgroundColor: AppColors.primaryLight.withValues(alpha: 0.5),
+          disabledBackgroundColor: AppColors.primaryLight.withOpacity(0.5),
           shape: const StadiumBorder(),
           elevation: 0,
           shadowColor: Colors.transparent,

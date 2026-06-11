@@ -135,7 +135,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(width: 4),
               CircleAvatar(
                 radius: 20,
-                backgroundColor: const Color(0xFF2E7D32).withValues(alpha: 0.15),
+                backgroundColor: const Color(0xFF2E7D32).withOpacity(0.15),
                 child: const Icon(
                   Icons.person_rounded,
                   color: Color(0xFF2E7D32),
@@ -163,7 +163,7 @@ class _HomeScreenState extends State<HomeScreen> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF1565C0).withValues(alpha: 0.3),
+            color: const Color(0xFF1565C0).withOpacity(0.3),
             blurRadius: 16,
             offset: const Offset(0, 6),
           ),
@@ -220,7 +220,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.18),
+              color: Colors.white.withOpacity(0.18),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
@@ -357,7 +357,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -418,7 +418,7 @@ class _HomeScreenState extends State<HomeScreen> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
+            color: Colors.black.withOpacity(0.08),
             blurRadius: 16,
             offset: const Offset(0, -4),
           ),
@@ -458,7 +458,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF2E7D32).withValues(alpha: 0.4),
+                        color: const Color(0xFF2E7D32).withOpacity(0.4),
                         blurRadius: 12,
                         offset: const Offset(0, 4),
                       ),
@@ -524,7 +524,7 @@ class _QuickActionCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.06),
+              color: Colors.black.withOpacity(0.06),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -537,7 +537,7 @@ class _QuickActionCard extends StatelessWidget {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: action.color.withValues(alpha: 0.12),
+                color: action.color.withOpacity(0.12),
                 shape: BoxShape.circle,
               ),
               child: Icon(action.icon, color: action.color, size: 26),
@@ -613,7 +613,7 @@ class _PriceCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -706,7 +706,7 @@ class _NavItem extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
                 color: isSelected
-                    ? const Color(0xFF2E7D32).withValues(alpha: 0.12)
+                    ? const Color(0xFF2E7D32).withOpacity(0.12)
                     : Colors.transparent,
                 borderRadius: BorderRadius.circular(12),
               ),

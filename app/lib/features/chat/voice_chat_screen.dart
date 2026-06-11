@@ -347,7 +347,7 @@ class _VoiceChatScreenState extends State<VoiceChatScreen>
   Widget _buildLiveTranscriptBanner() {
     return Container(
       width: double.infinity,
-      color: _green.withValues(alpha: 0.06),
+      color: _green.withOpacity(0.06),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       child: Row(
         children: [
@@ -412,7 +412,7 @@ class _VoiceChatScreenState extends State<VoiceChatScreen>
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.07),
+            color: Colors.black.withOpacity(0.07),
             blurRadius: 12,
             offset: const Offset(0, -3),
           ),
@@ -426,7 +426,7 @@ class _VoiceChatScreenState extends State<VoiceChatScreen>
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  color: Theme.of(context).colorScheme.surfaceVariant,
                   borderRadius: BorderRadius.circular(24),
                 ),
                 child: TextField(
@@ -458,7 +458,7 @@ class _VoiceChatScreenState extends State<VoiceChatScreen>
                 decoration: BoxDecoration(
                   color: _isListening
                       ? Colors.red.shade50
-                      : _green.withValues(alpha: 0.1),
+                      : _green.withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -553,7 +553,7 @@ class _ChatBubble extends StatelessWidget {
                         ? []
                         : [
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.06),
+                              color: Colors.black.withOpacity(0.06),
                               blurRadius: 8,
                               offset: const Offset(0, 2),
                             ),
@@ -657,7 +657,7 @@ class _TypingIndicatorState extends State<_TypingIndicator>
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.06),
+                  color: Colors.black.withOpacity(0.06),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),

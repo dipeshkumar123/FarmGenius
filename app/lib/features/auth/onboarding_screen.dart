@@ -147,7 +147,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           ),
                           elevation: 4,
                           shadowColor:
-                              const Color(0xFF2E7D32).withValues(alpha: 0.4),
+                              const Color(0xFF2E7D32).withOpacity(0.4),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -223,7 +223,7 @@ class _OnboardingPage extends StatelessWidget {
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: data.iconColor.withValues(alpha: 0.25),
+                  color: data.iconColor.withOpacity(0.25),
                   blurRadius: 32,
                   spreadRadius: 8,
                   offset: const Offset(0, 8),

@@ -199,14 +199,14 @@ class _DiseaseDetectScreenState extends State<DiseaseDetectScreen> {
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: _image == null
-                ? const Color(0xFF60AD5E).withValues(alpha: 0.45)
+                ? const Color(0xFF60AD5E).withOpacity(0.45)
                 : Colors.transparent,
             width: 2,
             // Dashed border via custom paint on empty state
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.06),
+              color: Colors.black.withOpacity(0.06),
               blurRadius: 14,
               offset: const Offset(0, 4),
             ),
@@ -269,7 +269,7 @@ class _DiseaseDetectScreenState extends State<DiseaseDetectScreen> {
         if (_isAnalyzing)
           Container(
             decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.55),
+              color: Colors.black.withOpacity(0.55),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Center(
@@ -292,7 +292,7 @@ class _DiseaseDetectScreenState extends State<DiseaseDetectScreen> {
                       .animate(onPlay: (c) => c.repeat())
                       .shimmer(
                         duration: 1200.ms,
-                        color: Colors.white.withValues(alpha: 0.6),
+                        color: Colors.white.withOpacity(0.6),
                       ),
                 ],
               ),
@@ -345,7 +345,7 @@ class _DiseaseDetectScreenState extends State<DiseaseDetectScreen> {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: Colors.black.withOpacity(0.04),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -447,7 +447,7 @@ class _DiseaseDetectScreenState extends State<DiseaseDetectScreen> {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
+            color: Colors.black.withOpacity(0.08),
             blurRadius: 20,
             offset: const Offset(0, 6),
           ),
@@ -468,7 +468,7 @@ class _DiseaseDetectScreenState extends State<DiseaseDetectScreen> {
                     color: (_isHealthy
                             ? const Color(0xFF43A047)
                             : Colors.red.shade400)
-                        .withValues(alpha: 0.12),
+                        .withOpacity(0.12),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
