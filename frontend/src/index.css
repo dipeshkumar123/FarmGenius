@@ -1,0 +1,233 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Noto+Sans:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --primary: #2E7D32;
+    --primary-light: #60AD5E;
+    --primary-dark: #1B5E20;
+    --accent: #F9A825;
+    --accent-dark: #F57F17;
+    --bg: #F1F8E9;
+    --surface: #FFFFFF;
+    --surface-variant: #E8F5E9;
+    --text-primary: #1B2B1D;
+    --text-secondary: #546E7A;
+    --error: #C62828;
+    --warning: #EF6C00;
+    --success: #388E3C;
+    --divider: #C8E6C9;
+  }
+
+  * {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-bg font-noto text-text-primary antialiased;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-poppins font-semibold;
+  }
+
+  ::selection {
+    background: rgba(46, 125, 50, 0.2);
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #F1F8E9;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #C8E6C9;
+    border-radius: 100px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #60AD5E;
+  }
+}
+
+@layer components {
+  /* Button variants */
+  .btn-primary {
+    @apply bg-primary text-white font-poppins font-semibold py-3 px-6 rounded-full
+           hover:bg-primary-dark active:scale-95 transition-all duration-200
+           disabled:opacity-50 disabled:cursor-not-allowed
+           shadow-sm hover:shadow-md;
+  }
+
+  .btn-secondary {
+    @apply bg-surface-variant text-primary font-poppins font-semibold py-3 px-6 rounded-full
+           border-2 border-primary hover:bg-primary hover:text-white active:scale-95
+           transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-accent {
+    @apply bg-accent text-text-primary font-poppins font-semibold py-3 px-6 rounded-full
+           hover:bg-accent-dark active:scale-95 transition-all duration-200
+           shadow-accent disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-ghost {
+    @apply text-primary font-poppins font-semibold py-3 px-6 rounded-full
+           hover:bg-surface-variant active:scale-95 transition-all duration-200;
+  }
+
+  /* Card */
+  .card {
+    @apply bg-white rounded-md shadow-card hover:shadow-card-hover 
+           transition-all duration-300 overflow-hidden;
+  }
+
+  .card-glass {
+    @apply rounded-md border border-white/40
+           transition-all duration-300;
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 4px 12px rgba(46, 125, 50, 0.08);
+  }
+
+  /* Input */
+  .input-field {
+    @apply w-full bg-surface-variant rounded-sm border border-transparent
+           text-text-primary font-noto text-base py-3 px-4
+           focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20
+           transition-all duration-200 placeholder-text-secondary;
+  }
+
+  /* Shimmer */
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      #E8F5E9 25%,
+      #F1F8E9 50%,
+      #E8F5E9 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s linear infinite;
+  }
+
+  /* Badge */
+  .badge {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-poppins font-semibold;
+  }
+
+  .badge-green {
+    @apply badge bg-surface-variant text-primary;
+  }
+
+  .badge-gold {
+    @apply badge bg-amber-100 text-amber-700;
+  }
+
+  .badge-red {
+    @apply badge bg-red-100 text-farm-error;
+  }
+
+  /* Nav item */
+  .nav-item {
+    @apply flex flex-col items-center gap-1 py-2 px-4 rounded-md
+           text-text-secondary transition-all duration-200
+           hover:text-primary hover:bg-surface-variant cursor-pointer;
+  }
+
+  .nav-item-active {
+    @apply text-primary bg-surface-variant;
+  }
+
+  /* Section heading */
+  .section-title {
+    @apply font-poppins font-semibold text-lg text-text-primary;
+  }
+
+  /* Price up/down */
+  .price-up {
+    @apply text-farm-success font-semibold;
+  }
+
+  .price-down {
+    @apply text-farm-error font-semibold;
+  }
+
+  .price-neutral {
+    @apply text-text-secondary font-semibold;
+  }
+
+  /* Chat bubbles */
+  .bubble-bot {
+    @apply bg-white text-text-primary rounded-lg rounded-tl-none
+           shadow-card px-4 py-3 max-w-xs lg:max-w-md;
+  }
+
+  .bubble-user {
+    @apply bg-primary text-white rounded-lg rounded-tr-none
+           px-4 py-3 max-w-xs lg:max-w-md;
+  }
+
+  /* Progress bar */
+  .progress-bar {
+    @apply h-2 rounded-full overflow-hidden bg-surface-variant;
+  }
+
+  /* Quick action button */
+  .quick-action {
+    @apply flex flex-col items-center justify-center gap-2
+           bg-white rounded-md p-4 shadow-card
+           hover:shadow-card-hover hover:-translate-y-1
+           active:scale-95 cursor-pointer transition-all duration-200
+           border border-transparent hover:border-primary/20;
+  }
+}
+
+@layer utilities {
+  .text-gradient-primary {
+    background: linear-gradient(135deg, #1B5E20 0%, #60AD5E 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-gold {
+    background: linear-gradient(135deg, #F57F17 0%, #F9A825 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .bg-glass {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .border-gradient {
+    border: 1px solid transparent;
+    background-clip: padding-box;
+    -webkit-background-clip: padding-box;
+  }
+
+  /* Hide scrollbar but keep scrolling */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}

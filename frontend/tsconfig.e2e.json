@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "moduleResolution": "bundler",
+    "verbatimModuleSyntax": false,
+    "allowSyntheticDefaultImports": true,
+    "noEmit": true,
+    "types": ["node"]
+  },
+  "include": ["tests/e2e/**/*.ts", "playwright.config.ts"]
+}

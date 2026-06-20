@@ -1,33 +1,27 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "name": "farmgenius-monorepo",
   "version": 2,
-  "buildCommand": null,
-  "outputDirectory": "public",
-  "framework": null,
-  "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/$1" },
-    { "source": "/(.*)", "destination": "/index.html" }
-  ],
-  "functions": {
-    "src/app.py": {
-      "runtime": "@vercel/python",
-      "maxDuration": 60
-    }
-  },
-  "headers": [
+  "builds": [
     {
-      "source": "/api/(.*)",
-      "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, PUT, DELETE, OPTIONS" },
-        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization" }
-      ]
+      "src": "backend/main.py",
+      "use": "@vercel/python"
     },
     {
-      "source": "/(css|js|assets)/(.*)",
-      "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
-      ]
+      "src": "frontend/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/backend/main.py"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/frontend/$1"
     }
   ]
 }

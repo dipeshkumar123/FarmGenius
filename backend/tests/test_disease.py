@@ -2,9 +2,7 @@ from fastapi.testclient import TestClient
 from main import app
 import io
 
-client = TestClient(app)
-
-def test_disease_endpoint_unauthorized():
+def test_disease_endpoint_unauthorized(client):
     file = io.BytesIO(b"dummy image bytes content")
     response = client.post(
         "/disease/detect", 

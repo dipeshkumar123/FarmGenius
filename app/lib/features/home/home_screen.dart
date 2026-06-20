@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../core/network/api_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -11,6 +12,28 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
+  final ApiService _apiService = ApiService();
+  bool _isLoading = true;
+  Map<String, dynamic>? _wheatPrice;
+  List<dynamic>? _weather;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchData();
+  }
+
+  Future<void> _fetchData() async {
+    final price = await _apiService.fetchPrices('wheat', 'dharwad', 'karnataka');
+    final weather = await _apiService.fetchWeather('dharwad', 'karnataka');
+    if (mounted) {
+      setState(() {
+        _wheatPrice = price;
+        _weather = weather;
+        _isLoading = false;
+      });
+    }
+  }
 
   // ─── Market price data ────────────────────────────────────────────────────
   final List<_PriceData> _prices = const [

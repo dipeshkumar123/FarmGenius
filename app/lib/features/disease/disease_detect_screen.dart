@@ -4,6 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'tflite_service.dart';
+import '../../core/network/api_service.dart';
 
 // ─── Screen ─────────────────────────────────────────────────────────────────
 
@@ -17,6 +18,7 @@ class DiseaseDetectScreen extends StatefulWidget {
 class _DiseaseDetectScreenState extends State<DiseaseDetectScreen> {
   // ── Services ──
   final TFLiteService _tfliteService = TFLiteService();
+  final ApiService _apiService = ApiService();
   final ImagePicker _picker = ImagePicker();
 
   // ── State ──
@@ -41,7 +43,7 @@ class _DiseaseDetectScreenState extends State<DiseaseDetectScreen> {
   }
 
   Future<void> _loadModel() async {
-    await _tfliteService.initModel();
+    await _tfliteService.init();
     if (mounted) setState(() => _isModelLoaded = true);
   }
 
@@ -66,32 +68,33 @@ class _DiseaseDetectScreenState extends State<DiseaseDetectScreen> {
     if (_image == null) return;
     setState(() => _isAnalyzing = true);
 
-    // Deliberate short pause for perceptual smoothness
-    await Future.delayed(const Duration(milliseconds: 1600));
+    // Try backend fallback
+    try {
+      final bytes = await _image!.readAsBytes();
+      final response = await _apiService.detectDisease(bytes);
+      
+      if (response != null && response['disease_name'] != null) {
+        setState(() {
+          _diseaseName = response['disease_name'];
+          _confidence = response['confidence']?.toDouble() ?? 0.85;
+          _isHealthy = _diseaseName!.toLowerCase().contains('healthy');
+          _isAnalyzing = false;
+        });
+        return;
+      }
+    } catch (_) {}
 
-    final raw = await _tfliteService.predict(_image!);
-    _parseResult(raw);
-
-    setState(() => _isAnalyzing = false);
-  }
-
-  /// Parse raw TFLiteService string e.g. "Tomato Early Blight\nConfidence: 87.3%"
-  void _parseResult(String raw) {
-    final lines = raw.split('\n');
-    final label = lines.isNotEmpty ? lines[0].trim() : raw.trim();
-    double conf = 0.85;
-
-    if (lines.length > 1) {
-      final confLine = lines[1]; // "Confidence: 87.3%"
-      final match = RegExp(r'([\d.]+)').firstMatch(confLine);
-      if (match != null) conf = double.parse(match.group(1)!) / 100.0;
+    // Fallback to local TFLite model
+    final result = await _tfliteService.detectDisease(_image!);
+    if (result != null) {
+      setState(() {
+        _diseaseName = result['disease_name'];
+        _confidence = result['confidence']?.toDouble() ?? 0.85;
+        _isHealthy = _diseaseName!.toLowerCase().contains('healthy');
+      });
     }
 
-    setState(() {
-      _diseaseName = label;
-      _confidence = conf.clamp(0.0, 1.0);
-      _isHealthy = label.toLowerCase().contains('healthy');
-    });
+    setState(() => _isAnalyzing = false);
   }
 
   // ─── Treatment Tips ───────────────────────────────────────────────────────

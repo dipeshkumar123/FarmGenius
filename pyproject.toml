@@ -16,3 +16,6 @@ ignore = ["E501", "E402", "F401", "W291", "W293"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = "test_*.py"
+markers = [
+    "slow: marks tests as slow (rate-limiting, bulk requests)",
+]

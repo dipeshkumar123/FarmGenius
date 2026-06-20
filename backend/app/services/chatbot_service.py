@@ -1,52 +1,26 @@
 import os
-import pickle
 from app.services.llm_service import llm_service
 from app.core.security import supabase
 
 class ChatbotService:
     def __init__(self):
-        self.model = None
-        self.vectorizer = None
-        self.classes = []
-        
-        # Load local MultinomialNB model trained on FARMER_CORPUS if available
-        # Note: Provide fallback behavior if file doesn't exist during initial build
-        model_path = os.path.join(os.path.dirname(__file__), "..", "..", "models", "chatbot_farmer_v1.pkl")
-        if os.path.exists(model_path):
-            with open(model_path, "rb") as f:
-                pipeline = pickle.load(f)
-                self.model = pipeline.named_steps['clf']
-                self.vectorizer = pipeline.named_steps['tfidf']
-                self.classes = self.model.classes_
+        pass
 
-    def get_response(self, query: str, language: str, farmer_id: str) -> dict:
+    async def get_response(self, query: str, language: str, farmer_id: str) -> dict:
         confidence = 0.0
         response_text = ""
         source = ""
         category = "General"
 
-        # Attempt local model inference first
-        if self.model and self.vectorizer:
-            try:
-                X = self.vectorizer.transform([query])
-                probs = self.model.predict_proba(X)[0]
-                max_prob = max(probs)
-                max_idx = probs.argmax()
-                
-                if max_prob >= 0.72:
-                    category = self.classes[max_idx]
-                    response_text = f"Your query falls under the category: '{category}'. For precise guidance, please follow up with your local KVK."
-                    confidence = max_prob
-                    source = "Local ML Model"
-            except Exception:
-                pass
-                
-        # Fallback to Groq LLM API if confidence is below 0.72 or model missing
-        if confidence < 0.72:
-            llm_res = llm_service.get_response(query, language)
+        try:
+            llm_res = await llm_service.get_response(query, language)
             response_text = llm_res["response"]
             confidence = llm_res["confidence"]
             source = llm_res["source"]
+        except Exception as e:
+            response_text = "Sorry, service is unavailable. Please contact your local KVK."
+            source = "Error"
+            confidence = 0.0
 
         # Background log to Supabase 'queries' table
         try:

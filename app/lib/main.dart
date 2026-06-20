@@ -6,6 +6,7 @@ import 'core/storage/offline_manager.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/splash_screen.dart';
 import 'features/auth/onboarding_screen.dart';
+import 'features/auth/login_screen.dart';
 import 'features/home/home_screen.dart';
 import 'features/chat/voice_chat_screen.dart';
 import 'features/disease/disease_detect_screen.dart';
@@ -61,6 +62,7 @@ class FarmGeniusApp extends StatelessWidget {
       routes: {
         '/splash':   (_) => const SplashScreen(),
         '/onboarding': (_) => const OnboardingScreen(),
+        '/login':    (_) => const LoginScreen(),
         '/home':     (_) => const HomeScreen(),
         '/chat':     (_) => const VoiceChatScreen(),
         '/scan':     (_) => const DiseaseDetectScreen(),
@@ -73,6 +75,7 @@ class FarmGeniusApp extends StatelessWidget {
         final routes = {
           '/splash':     const SplashScreen(),
           '/onboarding': const OnboardingScreen(),
+          '/login':      const LoginScreen(),
           '/home':       const HomeScreen(),
           '/chat':       const VoiceChatScreen(),
           '/scan':       const DiseaseDetectScreen(),

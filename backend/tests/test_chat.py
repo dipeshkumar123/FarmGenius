@@ -3,7 +3,7 @@ from main import app
 
 client = TestClient(app)
 
-def test_chat_endpoint_unauthorized():
+def test_chat_endpoint_unauthorized(client):
     response = client.post("/chat/", json={
         "query": "hello",
         "language": "en",

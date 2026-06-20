@@ -1,0 +1,14 @@
+node_modules
+.git
+venv
+__pycache__
+/app/
+model/
+flutter_sdk/
+dataset/
+frontend/node_modules/
+backend/venv/
+backend/__pycache__/
+.dart_tool
+build
+.pytest_cache/

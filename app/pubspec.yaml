@@ -65,7 +65,7 @@ flutter:
   uses-material-design: true
   generate: true
   assets:
-    - assets/models/model_quant.tflite
+    - assets/models/disease_model_quant.tflite
     - assets/models/labels_indian_crops.txt
     - assets/images/
     - assets/lottie/

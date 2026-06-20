@@ -75,7 +75,7 @@ class _SplashScreenState extends State<SplashScreen>
     // ── Auto-navigate after 2.5s ───────────────────────────────
     Future.delayed(const Duration(milliseconds: 2500), () {
       if (mounted) {
-        Navigator.pushReplacementNamed(context, '/home');
+        Navigator.pushReplacementNamed(context, '/onboarding');
       }
     });
   }

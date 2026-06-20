@@ -2,6 +2,8 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../core/network/api_service.dart';
+import 'package:intl/intl.dart';
 
 // ─────────────────────────────────────────────
 // DATA MODEL
@@ -65,11 +67,41 @@ const List<_Advisory> _advisories = [
 // ─────────────────────────────────────────────
 // SCREEN
 // ─────────────────────────────────────────────
-class WeatherScreen extends StatelessWidget {
+class WeatherScreen extends StatefulWidget {
   const WeatherScreen({super.key});
 
   @override
+  State<WeatherScreen> createState() => _WeatherScreenState();
+}
+
+class _WeatherScreenState extends State<WeatherScreen> {
+  final ApiService _apiService = ApiService();
+  bool _isLoading = true;
+  List<dynamic>? _weatherData;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchWeather();
+  }
+
+  Future<void> _fetchWeather() async {
+    final data = await _apiService.fetchWeather('dharwad', 'karnataka');
+    setState(() {
+      _weatherData = data;
+      _isLoading = false;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+        backgroundColor: Color(0xFFF1F8E9),
+        body: Center(child: CircularProgressIndicator(color: Color(0xFF2E7D32))),
+      );
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFFF1F8E9),
       appBar: AppBar(

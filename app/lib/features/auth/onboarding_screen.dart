@@ -61,7 +61,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     if (_currentPage < _slides.length - 1) {
       _goToPage(_currentPage + 1);
     } else {
-      Navigator.pushReplacementNamed(context, '/home');
+      Navigator.pushReplacementNamed(context, '/login');
     }
   }
 
@@ -94,7 +94,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               right: 16,
               child: TextButton(
                 onPressed: () =>
-                    Navigator.pushReplacementNamed(context, '/home'),
+                    Navigator.pushReplacementNamed(context, '/login'),
                 style: TextButton.styleFrom(
                   foregroundColor: const Color(0xFF2E7D32),
                   textStyle: GoogleFonts.poppins(

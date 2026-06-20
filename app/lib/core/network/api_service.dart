@@ -13,10 +13,14 @@ import 'package:dio/dio.dart';
 ///   - All public methods return `null` on failure rather than propagating
 ///     exceptions, so the UI can render graceful offline states.
 class ApiService {
-  // ─── Base URL — can be overridden for testing or future production URL ─────
-  static const String _defaultBaseUrl =
-      'https://pagodalike-dannielle-stageably.ngrok-free.dev';
-
+  // Use Vercel backend for live deployment
+  static const String _defaultBaseUrl = 'https://farmgenius-monorepo.vercel.app/api';
+  static String? _authToken;
+  
+  static void setToken(String token) {
+    _authToken = token;
+  }
+  
   late final Dio _dio;
 
   /// Creates an [ApiService]. Optionally provide a [baseUrl] to override the
@@ -38,7 +42,19 @@ class ApiService {
       ),
     );
 
-    // ── Retry interceptor ─────────────────────────────────────────────────
+    // ── Interceptors ────────────────────────────────────────────────────────
+    
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) {
+          if (_authToken != null) {
+            options.headers['Authorization'] = 'Bearer $_authToken';
+          }
+          return handler.next(options);
+        },
+      )
+    );
+
     // Retries up to 3 times with a 3-second back-off for transient errors.
     _dio.interceptors.add(
       InterceptorsWrapper(
@@ -67,6 +83,22 @@ class ApiService {
         err.type == DioExceptionType.receiveTimeout ||
         err.type == DioExceptionType.sendTimeout ||
         err.type == DioExceptionType.unknown;
+  }
+
+  // ─── Auth ─────────────────────────────────────────────────────────────────
+
+  Future<Map<String, dynamic>?> verifyOtp(String phone, String otp) async {
+    try {
+      final response = await _dio.post(
+        '/auth/verify-otp',
+        data: {'phone': phone, 'otp': otp},
+      );
+      return response.data as Map<String, dynamic>?;
+    } on DioException {
+      return null;
+    } catch (_) {
+      return null;
+    }
   }
 
   // ─── Chat ─────────────────────────────────────────────────────────────────

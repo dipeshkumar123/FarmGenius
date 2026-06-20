@@ -6,6 +6,6 @@ httpx
 groq
 python-multipart
 supabase
-scikit-learn
-numpy
-pytest
+PyJWT
+googlesearch-python==1.3.0
+beautifulsoup4==4.12.3
