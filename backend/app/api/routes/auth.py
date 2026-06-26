@@ -48,13 +48,21 @@ def verify_otp(req: VerifyOtpRequest):
         if req.otp != "123456":
             raise HTTPException(status_code=400, detail="Invalid OTP. Use 123456 for demo.")
         
-        # Create mock JWT token
+        # Create mock JWT token using a deterministic UUID for the phone number
+        import uuid
+        farmer_id = str(uuid.uuid5(uuid.NAMESPACE_OID, phone))
         payload = {
             "sub": farmer_id,
             "iat": int(time.time()),
             "exp": int(time.time()) + (30 * 24 * 60 * 60) # 30 days
         }
         token = jwt.encode(payload, settings.SUPABASE_SERVICE_KEY, algorithm="HS256")
+        
+        # Upsert the mock farmer into the DB
+        try:
+            supabase.table("farmers").upsert({"id": farmer_id, "phone": phone}).execute()
+        except Exception as e:
+            print(f"Mock user upsert failed: {e}")
     
     return AuthResponse(token=token, farmer_id=farmer_id)
 

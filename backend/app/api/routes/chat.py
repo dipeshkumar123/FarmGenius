@@ -7,10 +7,24 @@ router = APIRouter()
 
 @router.post("/", response_model=ChatResponse)
 async def chat_endpoint(req: ChatRequest, user_id: str = Depends(get_current_user)):
-    # Fix BOLA vulnerability: Always use the authenticated user_id, NOT the one from the request body
+    # Fix BOLA vulnerability: Always use the authenticated user_id
     farmer_id = user_id
-
-    # Pass the original language directly to the LLM system prompt.
+    
+    # Supabase strictly requires farmer_id to be a valid UUID.
+    # If the user logged in using the mock fallback, farmer_id might be a phone number.
+    # Convert it to a deterministic UUID to prevent Supabase 22P02 errors.
+    import uuid
+    try:
+        uuid.UUID(farmer_id)
+    except ValueError:
+        farmer_id = str(uuid.uuid5(uuid.NAMESPACE_OID, farmer_id))
+        
+    # Ensure this farmer exists in the database to satisfy the queries table foreign key constraint
+    try:
+        from app.core.security import supabase
+        supabase.table("farmers").upsert({"id": farmer_id, "phone": user_id}).execute()
+    except Exception as e:
+        print(f"Error upserting mock farmer: {e}")
     # The LLM (Llama 3.3 70B) handles Hindi, Kannada, Telugu, Tamil, Marathi, English natively.
     # This removes the LibreTranslate round-trip that was failing silently on Vercel.
     res = await chatbot_service.get_response(req.query, req.language, farmer_id)
