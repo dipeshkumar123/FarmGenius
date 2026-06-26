@@ -99,10 +99,58 @@ async def detect_disease(file: UploadFile = File(...)):
         except Exception as e:
             print(f"Error executing local model inference: {e}")
 
-    # Fallback if model fails or isn't loaded
-    raise HTTPException(
-        status_code=503,
-        detail="Disease detection is temporarily unavailable. Please try again later."
-    )
+    # --- 2. Fallback to Groq Vision API ---
+    try:
+        base64_image = base64.b64encode(content).decode('utf-8')
+        client = groq.Groq(api_key=settings.GROQ_API_KEY)
+        
+        prompt = """You are an expert agricultural AI. Analyze this plant leaf image and identify the disease.
+        Respond ONLY with a valid JSON object matching this schema:
+        {
+            "disease_name": "Name of disease in English (or Healthy)",
+            "confidence": 0.95,
+            "disease_name_hi": "Name of disease in Hindi",
+            "organic_treatment": "Best organic treatment method",
+            "chemical_treatment": "Best chemical treatment method with dosage",
+            "dosage": "Specific dosage instructions"
+        }"""
+        
+        completion = client.chat.completions.create(
+            model="llama-3.2-11b-vision-preview",
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": prompt},
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": f"data:image/jpeg;base64,{base64_image}"
+                            }
+                        }
+                    ]
+                }
+            ],
+            temperature=0.1,
+            response_format={"type": "json_object"}
+        )
+        
+        result = json.loads(completion.choices[0].message.content)
+        return {
+            "disease_name": result.get("disease_name", "Unknown"),
+            "confidence": result.get("confidence", 0.8),
+            "disease_name_hi": result.get("disease_name_hi", ""),
+            "organic_treatment": result.get("organic_treatment", "Consult local KVK."),
+            "chemical_treatment": result.get("chemical_treatment", "Consult local KVK."),
+            "dosage": result.get("dosage", ""),
+            "source_url": "https://kvk.icar.gov.in/",
+            "source_name": "FarmGenius AI (Groq Vision)"
+        }
+    except Exception as e:
+        print(f"Error executing Groq Vision fallback: {e}")
+        raise HTTPException(
+            status_code=503,
+            detail=f"Disease detection is temporarily unavailable. Error: {str(e)}"
+        )
 
 
