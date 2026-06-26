@@ -1,52 +1,69 @@
 import os
-
-try:
-    import joblib
-    import numpy as np
-    ML_AVAILABLE = True
-except ImportError:
-    ML_AVAILABLE = False
+import groq
+import json
+from app.core.config import settings
 
 class CropService:
     def __init__(self):
-        self.model = None
-        self.scaler = None
-        self._load_model()
+        pass
 
-    def _load_model(self):
-        if not ML_AVAILABLE:
-            return
-        model_path = os.path.join(os.path.dirname(__file__), "..", "..", "models", "crop_recommendation_model.pkl")
-        if os.path.exists(model_path):
-            try:
-                # Load the dictionary containing model and scaler
-                loaded = joblib.load(model_path)
-                self.model = loaded.get('model')
-                self.scaler = loaded.get('scaler')
-            except Exception as e:
-                print(f"Failed to load crop recommendation model: {e}")
-
-    def predict_crop(self, n: float, p: float, k: float, ph: float, ec: float, s: float, cu: float, fe: float, mn: float, zn: float, b: float) -> str:
-        if not ML_AVAILABLE or self.model is None or self.scaler is None:
-            return "Model unavailable. Please contact an agronomist."
-            
+    async def predict_crop(self, location: str, soil_type: str, water_availability: str, farm_size: str, season: str, n: str = None, p: str = None, k: str = None) -> list:
         try:
-            # The model expects exactly 11 features in this order:
-            # N, P, K, ph, EC, S, Cu, Fe, Mn, Zn, B
-            features = np.array([[n, p, k, ph, ec, s, cu, fe, mn, zn, b]])
+            client = groq.Groq(api_key=settings.GROQ_API_KEY)
             
-            # Scale the features
-            scaled_features = self.scaler.transform(features)
+            npk_context = ""
+            if n and p and k:
+                npk_context = f"The soil NPK values are approximately N:{n}, P:{p}, K:{k}."
+
+            prompt = f"""You are an expert Indian Agronomist AI. A farmer wants crop recommendations based on these exact details:
+Location: {location}
+Soil Type: {soil_type}
+Water Availability: {water_availability}
+Farm Size: {farm_size}
+Target Season: {season}
+{npk_context}
+
+Analyze these conditions and recommend the top 3 best crops for this specific farmer. 
+You MUST respond ONLY with a valid JSON object in this exact schema, containing exactly 3 crops:
+{{
+  "recommendations": [
+    {{
+      "rank": 1,
+      "name": "Paddy (Rice)",
+      "emoji": "🌾",
+      "suitability": 0.96,
+      "expectedYield": "45 q/acre",
+      "marketPrice": "₹2,060/q",
+      "profitEstimate": "₹92,700",
+      "season": "Kharif",
+      "water": "High",
+      "duration": "120-150 days"
+    }}
+  ]
+}}
+
+Ensure the estimates are realistic for the {location} region and {farm_size} size. Do not output any markdown formatting, only raw JSON.
+"""
+
+            completion = client.chat.completions.create(
+                model="meta-llama/llama-4-scout-17b-16e-instruct",
+                messages=[
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.2,
+                response_format={"type": "json_object"}
+            )
             
-            # Predict
-            prediction = self.model.predict(scaled_features)
+            result = json.loads(completion.choices[0].message.content)
+            return result.get("recommendations", [])
             
-            # Prediction is typically an array of strings, e.g. ['rice']
-            if len(prediction) > 0:
-                crop = str(prediction[0]).capitalize()
-                return crop
-            return "Unknown"
         except Exception as e:
-            return f"Error during prediction: {str(e)}"
+            print(f"Error during AI crop recommendation: {e}")
+            # Fallback mock data in case of LLM failure
+            return [
+                { "rank": 1, "name": "Paddy (Fallback)", "emoji": "🌾", "suitability": 0.90, "expectedYield": "40 q/acre", "marketPrice": "₹2,000/q", "profitEstimate": "₹80,000", "season": season, "water": "Medium", "duration": "120 days" },
+                { "rank": 2, "name": "Maize (Fallback)", "emoji": "🌽", "suitability": 0.85, "expectedYield": "30 q/acre", "marketPrice": "₹1,900/q", "profitEstimate": "₹57,000", "season": season, "water": "Medium", "duration": "100 days" },
+                { "rank": 3, "name": "Soybean (Fallback)", "emoji": "🫘", "suitability": 0.70, "expectedYield": "15 q/acre", "marketPrice": "₹4,000/q", "profitEstimate": "₹60,000", "season": season, "water": "Low", "duration": "95 days" }
+            ]
 
 crop_service = CropService()

@@ -33,7 +33,7 @@ class ChatbotService:
             }).execute()
         except Exception as e:
             # Silently catch insert errors to avoid disrupting user experience
-            pass
+            print(f"Insert error: {e}")
 
         return {
             "response": response_text,

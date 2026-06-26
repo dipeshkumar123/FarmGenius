@@ -2,28 +2,56 @@ import React, { useState } from 'react';
 import { PageWrapper, AnimatedSection } from '../components/ui/PageWrapper';
 import { Leaf, MapPin, Drop, Info, ChatCircleText, CaretDown, CheckCircle } from 'phosphor-react';
 import { motion, AnimatePresence } from 'framer-motion';
-
-const mockCrops = [
-  { rank: 1, name: 'Paddy (Rice)', emoji: '🌾', suitability: 0.96, expectedYield: '45 q/acre', marketPrice: '₹2,060/q', profitEstimate: '₹92,700', season: 'Kharif', water: 'High', duration: '120-150 days' },
-  { rank: 2, name: 'Maize', emoji: '🌽', suitability: 0.82, expectedYield: '32 q/acre', marketPrice: '₹1,920/q', profitEstimate: '₹61,440', season: 'Kharif', water: 'Medium', duration: '90-110 days' },
-  { rank: 3, name: 'Soybean', emoji: '🫘', suitability: 0.74, expectedYield: '18 q/acre', marketPrice: '₹4,420/q', profitEstimate: '₹79,560', season: 'Kharif', water: 'Low', duration: '90-100 days' },
-];
+import { apiClient } from '../api/client';
 
 export default function CropsPage() {
   const [step, setStep] = useState<1 | 2>(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [expandedCrop, setExpandedCrop] = useState<number | null>(null);
+  const [recommendations, setRecommendations] = useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
+    setError(null);
+    
+    const formData = new FormData(e.target as HTMLFormElement);
+    const location = formData.get('location') as string;
+    const soil_type = formData.get('soil_type') as string;
+    const water_availability = formData.get('water') as string;
+    const farmSizeNum = formData.get('farm_size') as string;
+    const farmSizeUnit = formData.get('farm_size_unit') as string;
+    const season = formData.get('season') as string;
+    const n = formData.get('n') as string || undefined;
+    const p = formData.get('p') as string || undefined;
+    const k = formData.get('k') as string || undefined;
+
+    try {
+      const response = await apiClient.post('/crop/recommend', {
+        location,
+        soil_type,
+        water_availability,
+        farm_size: `${farmSizeNum} ${farmSizeUnit}`,
+        season,
+        n,
+        p,
+        k
+      });
+      setRecommendations(response.data.recommendations || []);
       setStep(2);
-    }, 1500);
+    } catch (err: any) {
+      setError(err.response?.data?.detail || "Failed to fetch crop recommendations. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const resetForm = () => setStep(1);
+  const resetForm = () => {
+    setStep(1);
+    setRecommendations([]);
+    setError(null);
+  };
 
   return (
     <PageWrapper className="p-4 pb-24 bg-[#F1F8E9]">
@@ -49,7 +77,7 @@ export default function CropsPage() {
                   <label className="block text-sm font-medium text-[#1B2B1D] mb-1">Farm Location</label>
                   <div className="flex items-center bg-[#F1F8E9] p-3 rounded-xl border border-transparent focus-within:border-[#2E7D32]">
                     <MapPin className="text-[#2E7D32] mr-2" weight="fill" />
-                    <input type="text" defaultValue="Dharwad, Karnataka" className="bg-transparent border-none outline-none w-full text-sm text-[#1B2B1D]" />
+                    <input type="text" name="location" required defaultValue="Dharwad, Karnataka" className="bg-transparent border-none outline-none w-full text-sm text-[#1B2B1D]" />
                   </div>
                 </div>
 
@@ -57,7 +85,7 @@ export default function CropsPage() {
                 <div>
                   <label className="block text-sm font-medium text-[#1B2B1D] mb-1">Soil Type</label>
                   <div className="relative">
-                    <select className="w-full bg-[#F1F8E9] p-3 rounded-xl appearance-none outline-none text-sm text-[#1B2B1D] focus:border-[#2E7D32] border border-transparent">
+                    <select name="soil_type" className="w-full bg-[#F1F8E9] p-3 rounded-xl appearance-none outline-none text-sm text-[#1B2B1D] focus:border-[#2E7D32] border border-transparent">
                       <option>Loamy</option>
                       <option>Sandy</option>
                       <option>Clay</option>
@@ -75,7 +103,7 @@ export default function CropsPage() {
                   <div className="flex space-x-2">
                     {['Rainfed', 'Irrigated', 'Drip'].map((w) => (
                       <label key={w} className="flex-1">
-                        <input type="radio" name="water" className="peer sr-only" defaultChecked={w === 'Rainfed'} />
+                        <input type="radio" name="water" value={w} className="peer sr-only" defaultChecked={w === 'Rainfed'} />
                         <div className="text-center py-2 px-1 text-sm bg-[#F1F8E9] text-[#546E7A] rounded-xl cursor-pointer peer-checked:bg-[#2E7D32] peer-checked:text-white transition-colors">
                           {w}
                         </div>
@@ -88,9 +116,9 @@ export default function CropsPage() {
                 <div>
                   <label className="block text-sm font-medium text-[#1B2B1D] mb-1">Farm Size</label>
                   <div className="flex space-x-2">
-                    <input type="number" defaultValue={2} className="flex-1 bg-[#F1F8E9] p-3 rounded-xl outline-none text-sm text-[#1B2B1D] focus:border-[#2E7D32] border border-transparent" />
+                    <input type="number" name="farm_size" required defaultValue={2} className="flex-1 bg-[#F1F8E9] p-3 rounded-xl outline-none text-sm text-[#1B2B1D] focus:border-[#2E7D32] border border-transparent" />
                     <div className="relative w-1/3">
-                      <select className="w-full bg-[#F1F8E9] p-3 rounded-xl appearance-none outline-none text-sm text-[#1B2B1D] focus:border-[#2E7D32] border border-transparent">
+                      <select name="farm_size_unit" className="w-full bg-[#F1F8E9] p-3 rounded-xl appearance-none outline-none text-sm text-[#1B2B1D] focus:border-[#2E7D32] border border-transparent">
                         <option>Acres</option>
                         <option>Hectares</option>
                       </select>
@@ -105,7 +133,7 @@ export default function CropsPage() {
                   <div className="flex space-x-2">
                     {['Kharif', 'Rabi', 'Zaid'].map((s) => (
                       <label key={s} className="flex-1">
-                        <input type="radio" name="season" className="peer sr-only" defaultChecked={s === 'Kharif'} />
+                        <input type="radio" name="season" value={s} className="peer sr-only" defaultChecked={s === 'Kharif'} />
                         <div className="text-center py-2 px-1 text-sm bg-[#F1F8E9] text-[#546E7A] rounded-xl cursor-pointer peer-checked:bg-[#F9A825] peer-checked:text-white transition-colors font-medium">
                           {s}
                         </div>
@@ -121,13 +149,19 @@ export default function CropsPage() {
                     {['N', 'P', 'K'].map((npk) => (
                       <div key={npk} className="flex-1 relative">
                         <span className="absolute left-3 top-3.5 text-[#546E7A] text-xs font-bold">{npk}</span>
-                        <input type="number" placeholder="--" className="w-full bg-[#F1F8E9] p-3 pl-8 rounded-xl outline-none text-sm text-[#1B2B1D] focus:border-[#2E7D32] border border-transparent" />
+                        <input type="number" name={npk.toLowerCase()} placeholder="--" className="w-full bg-[#F1F8E9] p-3 pl-8 rounded-xl outline-none text-sm text-[#1B2B1D] focus:border-[#2E7D32] border border-transparent" />
                       </div>
                     ))}
                   </div>
                 </div>
               </div>
             </div>
+
+            {error && (
+              <div className="text-red-500 text-sm text-center p-2 bg-red-50 rounded-xl">
+                {error}
+              </div>
+            )}
 
             <button 
               type="submit" 
@@ -159,7 +193,7 @@ export default function CropsPage() {
               <button onClick={resetForm} className="text-sm text-[#2E7D32] font-medium hover:underline">Edit Details</button>
             </div>
 
-            {mockCrops.map((crop, idx) => {
+            {recommendations.map((crop, idx) => {
               const isExpanded = expandedCrop === idx;
               const badgeColors = ['bg-yellow-400', 'bg-slate-300', 'bg-amber-600'];
               const badgeColor = badgeColors[idx] || 'bg-gray-200';
@@ -176,15 +210,15 @@ export default function CropsPage() {
                     <div className="flex justify-between items-start mb-3">
                       <div className="flex items-center space-x-3">
                         <div className="text-4xl bg-[#F1F8E9] w-14 h-14 rounded-full flex items-center justify-center shadow-inner">
-                          {crop.emoji}
+                          {crop.emoji || '🌱'}
                         </div>
                         <div>
                           <div className="flex items-center space-x-2">
                             <h3 className="font-poppins font-bold text-lg text-[#1B2B1D]">{crop.name}</h3>
-                            {idx < 3 && <span className={`text-[10px] uppercase font-bold text-white px-2 py-0.5 rounded-full ${badgeColor}`}>#{crop.rank} Match</span>}
+                            {idx < 3 && <span className={`text-[10px] uppercase font-bold text-white px-2 py-0.5 rounded-full ${badgeColor}`}>#{crop.rank || idx + 1} Match</span>}
                           </div>
                           <div className="text-sm text-[#546E7A] flex items-center mt-0.5">
-                            <span className="font-medium text-[#2E7D32]">{Math.round(crop.suitability * 100)}% Suitability</span>
+                            <span className="font-medium text-[#2E7D32]">{Math.round((crop.suitability || 0.8) * 100)}% Suitability</span>
                           </div>
                         </div>
                       </div>
@@ -192,17 +226,17 @@ export default function CropsPage() {
                     </div>
 
                     <div className="w-full bg-[#E8F5E9] rounded-full h-2 mb-4 overflow-hidden">
-                      <div className="bg-[#2E7D32] h-full rounded-full transition-all duration-1000" style={{ width: `${crop.suitability * 100}%` }}></div>
+                      <div className="bg-[#2E7D32] h-full rounded-full transition-all duration-1000" style={{ width: `${(crop.suitability || 0.8) * 100}%` }}></div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3 mb-2">
                       <div className="bg-[#F1F8E9] p-2.5 rounded-xl">
                         <div className="text-xs text-[#546E7A] mb-0.5">Expected Yield</div>
-                        <div className="font-semibold text-[#1B2B1D]">{crop.expectedYield}</div>
+                        <div className="font-semibold text-[#1B2B1D]">{crop.expectedYield || '--'}</div>
                       </div>
                       <div className="bg-yellow-50 p-2.5 rounded-xl border border-yellow-100">
                         <div className="text-xs text-[#546E7A] mb-0.5">Est. Profit</div>
-                        <div className="font-semibold text-[#EF6C00]">{crop.profitEstimate}</div>
+                        <div className="font-semibold text-[#EF6C00]">{crop.profitEstimate || '--'}</div>
                       </div>
                     </div>
 
@@ -215,10 +249,10 @@ export default function CropsPage() {
                           className="pt-3 border-t border-gray-100 mt-3"
                         >
                           <div className="grid grid-cols-2 gap-y-2 gap-x-4 text-sm mb-4">
-                            <div className="flex items-center text-[#546E7A]"><CheckCircle size={16} className="text-[#2E7D32] mr-1.5"/> Season: <span className="text-[#1B2B1D] font-medium ml-1">{crop.season}</span></div>
-                            <div className="flex items-center text-[#546E7A]"><Drop size={16} className="text-blue-500 mr-1.5"/> Water: <span className="text-[#1B2B1D] font-medium ml-1">{crop.water}</span></div>
-                            <div className="flex items-center text-[#546E7A]"><Info size={16} className="text-[#F9A825] mr-1.5"/> Market: <span className="text-[#1B2B1D] font-medium ml-1">{crop.marketPrice}</span></div>
-                            <div className="flex items-center text-[#546E7A]"><CaretDown size={16} className="text-gray-400 mr-1.5 transform -rotate-90"/> Duration: <span className="text-[#1B2B1D] font-medium ml-1">{crop.duration}</span></div>
+                            <div className="flex items-center text-[#546E7A]"><CheckCircle size={16} className="text-[#2E7D32] mr-1.5"/> Season: <span className="text-[#1B2B1D] font-medium ml-1">{crop.season || '--'}</span></div>
+                            <div className="flex items-center text-[#546E7A]"><Drop size={16} className="text-blue-500 mr-1.5"/> Water: <span className="text-[#1B2B1D] font-medium ml-1">{crop.water || '--'}</span></div>
+                            <div className="flex items-center text-[#546E7A]"><Info size={16} className="text-[#F9A825] mr-1.5"/> Market: <span className="text-[#1B2B1D] font-medium ml-1">{crop.marketPrice || '--'}</span></div>
+                            <div className="flex items-center text-[#546E7A]"><CaretDown size={16} className="text-gray-400 mr-1.5 transform -rotate-90"/> Duration: <span className="text-[#1B2B1D] font-medium ml-1">{crop.duration || '--'}</span></div>
                           </div>
                           
                           <button className="w-full py-2.5 bg-[#E8F5E9] text-[#2E7D32] rounded-xl font-medium text-sm flex items-center justify-center hover:bg-[#2E7D32] hover:text-white transition-colors active:scale-95">
