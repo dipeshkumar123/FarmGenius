@@ -12,6 +12,7 @@
       "config": {
         "distDir": "dist"
       }
+    }
   ],
   "rewrites": [
     {
@@ -20,11 +21,11 @@
     },
     {
       "source": "/assets/(.*)",
-      "destination": "/frontend/assets/$1"
+      "destination": "/assets/$1"
     },
     {
       "source": "/(.*)",
-      "destination": "/frontend/index.html"
+      "destination": "/index.html"
     }
   ]
 }
