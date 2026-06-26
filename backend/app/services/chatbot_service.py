@@ -13,7 +13,7 @@ class ChatbotService:
         category = "General"
 
         try:
-            llm_res = await llm_service.get_response(query, language)
+            llm_res = await llm_service.get_response(query, language, farmer_id)
             response_text = llm_res["response"]
             confidence = llm_res["confidence"]
             source = llm_res["source"]

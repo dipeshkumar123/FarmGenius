@@ -84,7 +84,7 @@ class LLMService:
             }
         ]
 
-    async def get_response(self, query: str, language: str) -> dict:
+    async def get_response(self, query: str, language: str, farmer_id: str = None) -> dict:
         system_prompt = f"""You are FarmGenius, an expert agricultural advisor for Indian smallholder farmers.
 The farmer will ask you questions. You MUST answer in {language}.
 If the user asks about crop prices, weather, schemes, or crop recommendation based on soil, ALWAYS use the relevant tool to fetch real data before answering. Do not guess.
@@ -92,10 +92,21 @@ If the tool returns no data or fails, politely inform the user that the informat
 Keep answers under 3 sentences unless explaining a scheme. Be specific and helpful.
 Do not make up treatments or prices.
 """
-        messages = [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": query}
-        ]
+        
+        history_msgs = []
+        if farmer_id:
+            try:
+                from app.core.security import supabase
+                # Fetch last 4 queries for context
+                res = supabase.table("queries").select("query_text, response").eq("farmer_id", farmer_id).order("timestamp", desc=True).limit(4).execute()
+                if res.data:
+                    for row in reversed(res.data):
+                        history_msgs.append({"role": "user", "content": row.get("query_text", "")})
+                        history_msgs.append({"role": "assistant", "content": row.get("response", "")})
+            except Exception as e:
+                print(f"Error fetching chat history: {e}")
+
+        messages = [{"role": "system", "content": system_prompt}] + history_msgs + [{"role": "user", "content": query}]
 
         try:
             # Step 1: Initial LLM call with tools
