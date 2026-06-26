@@ -1,19 +1,21 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { PageWrapper, AnimatedSection } from '../components/ui/PageWrapper';
 import { MagnifyingGlass, CheckCircle, ArrowRight } from 'phosphor-react';
 import { motion } from 'framer-motion';
 
 const schemes = [
-  { id: 1, name: 'PM-KISAN', fullName: 'Pradhan Mantri Kisan Samman Nidhi', category: 'Direct Benefit', amount: '₹6,000/year', eligibility: 'Small & marginal farmers with less than 2 hectares', deadline: 'Ongoing', color: '#FF6B35', emoji: '🏛️', description: 'Direct income support to eligible farmer families in 3 equal installments.' },
-  { id: 2, name: 'PMFBY', fullName: 'Pradhan Mantri Fasal Bima Yojana', category: 'Crop Insurance', amount: 'Up to full coverage', eligibility: 'All farmers growing notified crops', deadline: 'Before sowing', color: '#2196F3', emoji: '🛡️', description: 'Crop insurance scheme providing financial support if crops fail due to natural calamities.' },
-  { id: 3, name: 'KCC', fullName: 'Kisan Credit Card', category: 'Credit/Loans', amount: 'Up to ₹3 lakh @ 7%', eligibility: 'All farmers, tenant farmers, sharecroppers', deadline: 'Ongoing', color: '#9C27B0', emoji: '💳', description: 'Short-term credit needs for cultivation and allied activities at subsidized interest rates.' },
-  { id: 4, name: 'PMKSY', fullName: 'PM Krishi Sinchayee Yojana', category: 'Irrigation', amount: '55% subsidy', eligibility: 'Individual farmers, farmer groups', deadline: 'State-wise', color: '#00BCD4', emoji: '💧', description: 'Micro-irrigation subsidy scheme for drip and sprinkler irrigation systems.' },
-  { id: 5, name: 'eNAM', fullName: 'National Agriculture Market', category: 'Market Access', amount: 'Free platform', eligibility: 'Any registered farmer', deadline: 'Ongoing', color: '#4CAF50', emoji: '🏪', description: 'Online trading portal for farmers to sell produce directly to buyers across India.' },
+  { id: 1, name: 'PM-KISAN', fullName: 'Pradhan Mantri Kisan Samman Nidhi', category: 'Direct Benefit', amount: '₹6,000/year', eligibility: 'Small & marginal farmers with less than 2 hectares', deadline: 'Ongoing', color: '#FF6B35', emoji: '🏛️', description: 'Direct income support to eligible farmer families in 3 equal installments.', applyLink: 'https://pmkisan.gov.in' },
+  { id: 2, name: 'PMFBY', fullName: 'Pradhan Mantri Fasal Bima Yojana', category: 'Crop Insurance', amount: 'Up to full coverage', eligibility: 'All farmers growing notified crops', deadline: 'Before sowing', color: '#2196F3', emoji: '🛡️', description: 'Crop insurance scheme providing financial support if crops fail due to natural calamities.', applyLink: 'https://pmfby.gov.in' },
+  { id: 3, name: 'KCC', fullName: 'Kisan Credit Card', category: 'Credit/Loans', amount: 'Up to ₹3 lakh @ 7%', eligibility: 'All farmers, tenant farmers, sharecroppers', deadline: 'Ongoing', color: '#9C27B0', emoji: '💳', description: 'Short-term credit needs for cultivation and allied activities at subsidized interest rates.', applyLink: 'https://www.nabard.org/kisan-credit-card' },
+  { id: 4, name: 'PMKSY', fullName: 'PM Krishi Sinchayee Yojana', category: 'Irrigation', amount: '55% subsidy', eligibility: 'Individual farmers, farmer groups', deadline: 'State-wise', color: '#00BCD4', emoji: '💧', description: 'Micro-irrigation subsidy scheme for drip and sprinkler irrigation systems.', applyLink: 'https://pmksy.gov.in' },
+  { id: 5, name: 'eNAM', fullName: 'National Agriculture Market', category: 'Market Access', amount: 'Free platform', eligibility: 'Any registered farmer', deadline: 'Ongoing', color: '#4CAF50', emoji: '🏪', description: 'Online trading portal for farmers to sell produce directly to buyers across India.', applyLink: 'https://www.enam.gov.in' },
 ];
 
 const categories = ['All', 'Direct Benefit', 'Crop Insurance', 'Credit/Loans', 'Irrigation', 'Market Access'];
 
 export default function SchemesPage() {
+  const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
 
@@ -91,11 +93,23 @@ export default function SchemesPage() {
                   </div>
 
                   <div className="flex space-x-3 mt-auto">
-                    <button className="flex-1 py-2.5 border border-[#2E7D32] text-[#2E7D32] rounded-xl text-sm font-medium hover:bg-[#E8F5E9] transition-colors flex justify-center items-center">
+                    <button
+                      onClick={() =>
+                        navigate('/chat', {
+                          state: {
+                            prefill: `Am I eligible for ${scheme.name} (${scheme.fullName})? My farm is in Karnataka.`,
+                          },
+                        })
+                      }
+                      className="flex-1 py-2.5 border border-[#2E7D32] text-[#2E7D32] rounded-xl text-sm font-medium hover:bg-[#E8F5E9] transition-colors flex justify-center items-center"
+                    >
                       <CheckCircle weight="fill" className="mr-1.5" size={18} />
                       Check Eligibility
                     </button>
-                    <button className="flex-1 py-2.5 bg-[#2E7D32] text-white rounded-xl text-sm font-medium hover:bg-[#1B5E20] transition-colors flex justify-center items-center shadow-md shadow-[#2E7D32]/20">
+                    <button
+                      onClick={() => window.open(scheme.applyLink, '_blank', 'noopener,noreferrer')}
+                      className="flex-1 py-2.5 bg-[#2E7D32] text-white rounded-xl text-sm font-medium hover:bg-[#1B5E20] transition-colors flex justify-center items-center shadow-md shadow-[#2E7D32]/20"
+                    >
                       Apply Now
                       <ArrowRight weight="bold" className="ml-1.5" size={16} />
                     </button>

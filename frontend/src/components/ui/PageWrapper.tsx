@@ -58,14 +58,14 @@ const pageVariants = {
  * }
  * ```
  */
-export function PageWrapper({ children, className = '' }: PageWrapperProps) {
+export function PageWrapper({ children, className = '', noPadding = false }: PageWrapperProps) {
   return (
     <motion.div
       variants={pageVariants}
       initial="initial"
       animate="animate"
       exit="exit"
-      className={`min-h-screen ${className}`}
+      className={`${noPadding ? '' : 'min-h-screen'} ${className}`}
     >
       {children}
     </motion.div>

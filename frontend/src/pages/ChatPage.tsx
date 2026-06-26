@@ -52,12 +52,41 @@ const LANGUAGES: LanguageOption[] = [
   { code: 'mr', label: 'Marathi', nativeLabel: 'मराठी' },
 ];
 
-const WELCOME_QUICK_REPLIES = [
-  'What crops to grow?',
-  'Check wheat price',
-  'Disease in my tomato',
-  'Weather this week',
-];
+const WELCOME_QUICK_REPLIES: Record<string, string[]> = {
+  en: ['What crops to grow?', 'Check wheat price', 'Disease in my tomato', 'Weather this week'],
+  hi: ['कौन सी फसल उगाएं?', 'गेहूं का भाव', 'टमाटर में रोग', 'इस हफ्ते मौसम'],
+  kn: ['ಯಾವ ಬೆಳೆ ಬೆಳೆಯಬೇಕು?', 'ಗೋಧಿ ಬೆಲೆ', 'ಟೊಮ್ಯಾಟೊ ರೋಗ', 'ಈ ವಾರ ಹವಾಮಾನ'],
+  te: ['ఏ పంట వేయాలి?', 'గోధుమ ధర', 'టమాటో వ్యాధి', 'ఈ వారం వాతావరణం'],
+  ta: ['என்ன பயிர் வளர்க்கலாம்?', 'கோதுமை விலை', 'தக்காளி நோய்', 'இந்த வார வானிலை'],
+  mr: ['कोणते पीक घ्यावे?', 'गव्हाचा भाव', 'टोमॅटोचा रोग', 'या आठवड्याचे हवामान'],
+};
+
+const QUICK_REPLIES_BY_CONTEXT: Record<string, Record<string, string[]>> = {
+  price: {
+    en: ['Check another crop', 'When to sell?', 'Weather this week'],
+    hi: ['दूसरी फसल चेक करें', 'कब बेचें?', 'इस हफ्ते मौसम'],
+    kn: ['ಇನ್ನೊಂದು ಬೆಳೆ ತಪಾಸಣೆ', 'ಯಾವಾಗ ಮಾರಾಟ ಮಾಡಬೇಕು?', 'ಈ ವಾರ ಹವಾಮಾನ'],
+    te: ['మరో పంట తనిఖీ', 'ఎప్పుడు అమ్మాలి?', 'ఈ వారం వాతావరణం'],
+    ta: ['வேறு பயிர் சரிபார்க்க', 'எப்போது விற்கலாம்?', 'இந்த வார வானிலை'],
+    mr: ['दुसरे पीक तपासा', 'केव्हा विकायचे?', 'या आठवड्याचे हवामान'],
+  },
+  disease: {
+    en: ['What treatment?', 'How to prevent?', 'Contact KVK'],
+    hi: ['क्या उपचार?', 'कैसे रोकें?', 'KVK से संपर्क'],
+    kn: ['ಏನು ಚಿಕಿತ್ಸೆ?', 'ಹೇಗೆ ತಡೆಯಬೇಕು?', 'KVK ಸಂಪರ್ಕ'],
+    te: ['ఏం చికిత్స?', 'ఎలా నివారించాలి?', 'KVK సంప్రదించండి'],
+    ta: ['என்ன சிகிச்சை?', 'எப்படி தடுக்கலாம்?', 'KVK தொடர்பு'],
+    mr: ['काय उपचार?', 'कसे रोखायचे?', 'KVK शी संपर्क'],
+  },
+  weather: {
+    en: ['Should I irrigate today?', 'Spray tomorrow?', 'Harvest timing'],
+    hi: ['आज सिंचाई करूं?', 'कल स्प्रे करें?', 'कटाई का समय'],
+    kn: ['ಇಂದು ನೀರಾವರಿ ಮಾಡಬೇಕೇ?', 'ನಾಳೆ ಸ್ಪ್ರೇ?', 'ಕಟಾವು ಸಮಯ'],
+    te: ['ఈరోజు నీళ్ళు పెట్టాలా?', 'రేపు స్ప్రే చేయాలా?', 'కోత సమయం'],
+    ta: ['இன்று நீர்ப்பாசனம் செய்யலாமா?', 'நாளை தெளிக்கலாமா?', 'அறுவடை நேரம்'],
+    mr: ['आज सिंचन करावे का?', 'उद्या फवारणी?', 'कापणीची वेळ'],
+  },
+};
 
 const MOCK_RESPONSES: Record<string, string> = {
   wheat:
@@ -114,13 +143,21 @@ function formatTime(date: Date): string {
 
 // ─── Welcome message ──────────────────────────────────────────────────────────
 
-function buildWelcomeMessage(): Message {
+function buildWelcomeMessage(lang: string): Message {
+  const welcomeText: Record<string, string> = {
+    en: "Namaste! 🙏 I'm **FarmGenius AI**, your smart farming assistant.\n\nAsk me anything about crops, diseases, weather, or market prices — in Hindi, English, Kannada, or any Indian language!",
+    hi: "नमस्ते! 🙏 मैं **FarmGenius AI** हूं, आपका स्मार्ट खेती सहायक।\n\nफसल, रोग, मौसम या मंडी भाव के बारे में कुछ भी पूछें!",
+    kn: "ನಮಸ್ತೆ! 🙏 ನಾನು **FarmGenius AI**, ನಿಮ್ಮ ಸ್ಮಾರ್ಟ್ ಕೃಷಿ ಸಹಾಯಕ.\n\nಬೆಳೆ, ರೋಗ, ಹವಾಮಾನ ಅಥವಾ ಮಾರುಕಟ್ಟೆ ಬೆಲೆಯ ಬಗ್ಗೆ ಕೇಳಿ!",
+    te: "నమస్తే! 🙏 నేను **FarmGenius AI**, మీ స్మార్ట్ వ్యవసాయ సహాయకుడు.\n\nపంట, వ్యాధి, వాతావరణం లేదా మార్కెట్ ధరల గురించి అడగండి!",
+    ta: "நமஸ்தே! 🙏 நான் **FarmGenius AI**, உங்கள் ஸ்மார்ட் விவசாய உதவியாளர்.\n\nபயிர், நோய், வானிலை அல்லது சந்தை விலை பற்றி கேளுங்கள்!",
+    mr: "नमस्ते! 🙏 मी **FarmGenius AI**, तुमचा स्मार्ट शेती सहाय्यक.\n\nपीक, रोग, हवामान किंवा बाजारभाव बद्दल काहीही विचारा!",
+  };
   return {
     id: 'welcome',
     sender: 'bot',
     timestamp: new Date(),
-    text: "Namaste! 🙏 I'm **FarmGenius AI**, your smart farming assistant.\n\nAsk me anything about crops, diseases, weather, or market prices — in Hindi, English, Kannada, or any Indian language!",
-    quickReplies: WELCOME_QUICK_REPLIES,
+    text: welcomeText[lang] ?? welcomeText['en'],
+    quickReplies: WELCOME_QUICK_REPLIES[lang] ?? WELCOME_QUICK_REPLIES['en'],
   };
 }
 
@@ -148,7 +185,6 @@ function TypingIndicator() {
               duration: 0.7,
               repeat: Infinity,
               delay: i * 0.16,
-              
             }}
             className="w-2 h-2 rounded-full bg-text-secondary inline-block"
           />
@@ -160,7 +196,6 @@ function TypingIndicator() {
 
 /** Render bot message text with **bold** markdown support */
 function BotText({ text }: { text: string }) {
-  // Split on **bold** markers
   const segments = text.split(/(\*\*[^*]+\*\*)/g);
   return (
     <>
@@ -196,7 +231,7 @@ function MessageBubble({ message, onQuickReply }: MessageBubbleProps) {
       layout
       initial={{ opacity: 0, y: 16, scale: 0.97 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.3, }}
+      transition={{ duration: 0.3 }}
       className={`flex items-end gap-2 mb-4 ${isBot ? 'justify-start' : 'justify-end'}`}
     >
       {/* Bot avatar */}
@@ -259,6 +294,18 @@ function MessageBubble({ message, onQuickReply }: MessageBubbleProps) {
   );
 }
 
+// ─── Speech Recognition helper ────────────────────────────────────────────────
+
+
+const LANG_TO_BCP47: Record<string, string> = {
+  en: 'en-IN',
+  hi: 'hi-IN',
+  kn: 'kn-IN',
+  te: 'te-IN',
+  ta: 'ta-IN',
+  mr: 'mr-IN',
+};
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function ChatPage() {
@@ -269,7 +316,7 @@ export default function ChatPage() {
   const setLanguage = useAppStore((s) => s.setLanguage);
   const farmer = useAppStore((s) => s.farmer);
 
-  const [messages, setMessages] = useState<Message[]>([buildWelcomeMessage()]);
+  const [messages, setMessages] = useState<Message[]>(() => [buildWelcomeMessage(storedLang ?? 'en')]);
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
@@ -280,7 +327,7 @@ export default function ChatPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
+  const recognitionRef = useRef<any>(null);
 
   // Pre-fill from navigation state (e.g. from ScanPage "Ask AI about this")
   useEffect(() => {
@@ -300,6 +347,15 @@ export default function ChatPage() {
     scrollToBottom();
   }, [messages, isTyping, scrollToBottom]);
 
+  // Cleanup speech recognition on unmount
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.abort();
+      }
+    };
+  }, []);
+
   // ── Core send logic ───────────────────────────────────────────────────────
   const sendMessage = useCallback(
     async (text: string, imageUrl?: string) => {
@@ -309,7 +365,7 @@ export default function ChatPage() {
         id: uid(),
         sender: 'user',
         timestamp: new Date(),
-        text: text.trim() || 'I uploaded a photo for diagnosis.',
+        text: text.trim() || 'I uploaded a photo for diagnosis. 📷',
         imageUrl,
       };
 
@@ -318,12 +374,32 @@ export default function ChatPage() {
       setIsLoading(true);
       setIsTyping(true);
 
-      // Simulate realistic network delay
-      await new Promise((r) => setTimeout(r, 1500));
-
       let botText = '';
 
-      if (!isOffline) {
+      // BUG 15 FIX: If image is attached, call /disease/detect instead of /chat
+      if (imageUrl && !text.trim()) {
+        try {
+          const response = await fetch(imageUrl);
+          const blob = await response.blob();
+          const formData = new FormData();
+          formData.append('file', blob, 'leaf.jpg');
+
+          const apiRes = await apiClient.post('/disease/detect', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+          });
+
+          const data = apiRes.data;
+          const conf = Math.round(data.confidence * 100);
+          botText = `🔬 **${data.disease_name}** detected with **${conf}% confidence**.\n\n`;
+          if (data.organic_treatment) botText += `🌿 Organic: ${data.organic_treatment}\n`;
+          if (data.chemical_treatment) botText += `💊 Chemical: ${data.chemical_treatment}\n`;
+          if (data.dosage) botText += `📏 Dosage: ${data.dosage}\n`;
+          botText += `\nSource: ${data.source_name}`;
+        } catch {
+          // Fallback to generic mock disease result when backend 503
+          botText = '🔬 **Tomato Late Blight** detected (offline/demo result).\n\n🌿 Organic: Neem oil spray 3ml/L every 7 days.\n💊 Chemical: Mancozeb 75% WP @ 2g/L every 7 days.\n\n⚠️ *This is a demo result. Upload a clear leaf photo for accurate diagnosis.*';
+        }
+      } else if (!isOffline) {
         try {
           const res = await apiClient.post<{ response: string }>('/chat', {
             query: text,
@@ -341,14 +417,17 @@ export default function ChatPage() {
       setIsTyping(false);
       setIsLoading(false);
 
-      // Derive contextual quick replies
+      // Derive contextual quick replies in the right language
+      const lang = selectedLang as keyof typeof QUICK_REPLIES_BY_CONTEXT.price;
       const qr =
-        text.toLowerCase().includes('price') || text.toLowerCase().includes('mandi')
-          ? ['Check another crop', 'When to sell?', 'Weather this week']
-          : text.toLowerCase().includes('disease') || text.toLowerCase().includes('pest')
-          ? ['What treatment?', 'How to prevent?', 'Contact KVK']
-          : text.toLowerCase().includes('weather') || text.toLowerCase().includes('rain')
-          ? ['Should I irrigate today?', 'Spray tomorrow?', 'Harvest timing']
+        text.toLowerCase().includes('price') || text.toLowerCase().includes('mandi') || text.toLowerCase().includes('bhav') || text.toLowerCase().includes('ಬೆಲೆ') || text.toLowerCase().includes('ధర')
+          ? QUICK_REPLIES_BY_CONTEXT.price[lang] ?? QUICK_REPLIES_BY_CONTEXT.price['en']
+          : text.toLowerCase().includes('disease') || text.toLowerCase().includes('pest') || text.toLowerCase().includes('roga') || text.toLowerCase().includes('ರೋಗ') || text.toLowerCase().includes('వ్యాధి')
+          ? QUICK_REPLIES_BY_CONTEXT.disease[lang] ?? QUICK_REPLIES_BY_CONTEXT.disease['en']
+          : text.toLowerCase().includes('weather') || text.toLowerCase().includes('rain') || text.toLowerCase().includes('mausam') || text.toLowerCase().includes('ಮಳೆ')
+          ? QUICK_REPLIES_BY_CONTEXT.weather[lang] ?? QUICK_REPLIES_BY_CONTEXT.weather['en']
+          : imageUrl
+          ? QUICK_REPLIES_BY_CONTEXT.disease[lang] ?? QUICK_REPLIES_BY_CONTEXT.disease['en']
           : undefined;
 
       const botMsg: Message = {
@@ -399,20 +478,78 @@ export default function ChatPage() {
     [sendMessage]
   );
 
-  // ── Voice recording (stub — uses Web Speech API placeholder) ─────────────
+  // BUG 8 FIX: Real Web Speech API with BCP-47 language codes
   const toggleRecording = useCallback(() => {
     if (isRecording) {
+      recognitionRef.current?.abort();
+      recognitionRef.current = null;
       setIsRecording(false);
-    } else {
+      return;
+    }
+
+    const SpeechRecognitionAPI =
+      (window as any).SpeechRecognition ?? (window as any).webkitSpeechRecognition;
+
+    if (!SpeechRecognitionAPI) {
+      // Fallback stub for browsers without Web Speech API (e.g. Firefox)
       setIsRecording(true);
-      // Simulate 3s listening then populate a sample phrase
       setTimeout(() => {
         setIsRecording(false);
-        setInputText('Meri wheat ki patti yellow ho rahi hai, kya karu?');
+        const stubs: Record<string, string> = {
+          hi: 'मेरी गेहूं की पत्ती पीली हो रही है, क्या करूं?',
+          kn: 'ನನ್ನ ಟೊಮ್ಯಾಟೊ ಎಲೆಗಳು ಹಳದಿ ಆಗುತ್ತಿವೆ, ಏನು ಮಾಡಲಿ?',
+          te: 'నా గోధుమ ఆకులు పసుపు రంగులోకి మారుతున్నాయి, ఏమి చేయాలి?',
+          ta: 'என் கோதுமை இலைகள் மஞ்சள் ஆகின்றன, என்ன செய்வது?',
+          mr: 'माझ्या गव्हाची पाने पिवळी पडत आहेत, काय करू?',
+          en: 'My wheat leaves are turning yellow, what should I do?',
+        };
+        setInputText(stubs[selectedLang] ?? stubs['en']);
         inputRef.current?.focus();
       }, 3000);
+      return;
     }
-  }, [isRecording]);
+
+    const recognition: any = new SpeechRecognitionAPI();
+    recognition.lang = LANG_TO_BCP47[selectedLang] ?? 'en-IN';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0]?.[0]?.transcript ?? '';
+      if (transcript) {
+        setInputText(transcript);
+        inputRef.current?.focus();
+      }
+    };
+
+    recognition.onerror = () => {
+      setIsRecording(false);
+      recognitionRef.current = null;
+    };
+
+    recognition.onend = () => {
+      setIsRecording(false);
+      recognitionRef.current = null;
+    };
+
+    recognitionRef.current = recognition;
+    recognition.start();
+    setIsRecording(true);
+  }, [isRecording, selectedLang]);
+
+  // BUG 14 FIX: Update welcome message and lang state when language changes
+  const handleLangChange = useCallback((langCode: string) => {
+    setSelectedLang(langCode);
+    setLanguage(langCode);
+    setShowLangPicker(false);
+    // If no messages beyond welcome, rebuild welcome in new language
+    setMessages((prev) => {
+      if (prev.length === 1 && prev[0].id === 'welcome') {
+        return [buildWelcomeMessage(langCode)];
+      }
+      return prev;
+    });
+  }, [setLanguage]);
 
   const currentLang = LANGUAGES.find((l) => l.code === selectedLang);
 
@@ -499,11 +636,7 @@ export default function ChatPage() {
                 {LANGUAGES.map((lang) => (
                   <button
                     key={lang.code}
-                    onClick={() => {
-                      setSelectedLang(lang.code);
-                      setLanguage(lang.code); // persist to Zustand store (survives page navigation)
-                      setShowLangPicker(false);
-                    }}
+                    onClick={() => handleLangChange(lang.code)}
                     className={`w-full flex items-center justify-between px-4 py-2.5 text-sm font-noto
                                 hover:bg-surface-variant transition-colors ${
                                   selectedLang === lang.code

@@ -44,8 +44,9 @@ def verify_otp(req: VerifyOtpRequest):
     except Exception as e:
         # Fallback to mock OTP verification
         print(f"Supabase Verify failed: {e}. Falling back to mock verification.")
-        if req.otp == "000000":
-            raise HTTPException(status_code=400, detail="Invalid OTP")
+        # Accept only "123456" as the demo OTP. All other codes are invalid.
+        if req.otp != "123456":
+            raise HTTPException(status_code=400, detail="Invalid OTP. Use 123456 for demo.")
         
         # Create mock JWT token
         payload = {

@@ -755,7 +755,9 @@ export default function LoginPage() {
                 <div className="bg-surface-variant border border-farm-divider rounded-xl px-4 py-3 flex items-start gap-3">
                   <ShieldCheck size={20} weight="fill" className="text-primary shrink-0 mt-0.5" />
                   <p className="font-noto text-text-secondary text-sm leading-relaxed">
-                    Enter any 6-digit OTP to continue (demo mode). In production, a real OTP will be sent.
+                    Demo mode: enter{' '}
+                    <span className="font-poppins font-bold text-primary">123456</span>{' '}
+                    as the OTP to sign in. A real SMS OTP will be used in production.
                   </p>
                 </div>
 

@@ -165,14 +165,16 @@ export default function ScanPage() {
     setScanState('uploaded');
   }, []);
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+  const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop,
     accept: { 'image/*': ['.jpg', '.jpeg', '.png', '.webp'] },
     maxFiles: 1,
     maxSize: 10 * 1024 * 1024,
+    noClick: false,
   });
 
   const [result, setResult] = useState<ScanResult | null>(null);
+  const [isDemo, setIsDemo] = useState(false);
 
   const startProcessing = async () => {
     if (!preview) return;
@@ -241,11 +243,15 @@ export default function ScanPage() {
       setProgress(100);
       setTimeout(() => setScanState('result'), 400);
 
-    } catch (error) {
-      console.error('API Error:', error);
+    } catch (error: any) {
+      console.error('Disease API error, using demo fallback:', error);
       if (progressRef.current) clearInterval(progressRef.current);
-      setProgress(0);
-      setScanState('error');
+      setProgress(100);
+      // BUG 4 FIX: Show mock result with disclaimer instead of bare error state
+      // This ensures farmers still see useful disease guidance even when the backend is unavailable
+      setResult(mockResult);
+      setIsDemo(true);
+      setTimeout(() => setScanState('result'), 400);
     }
   };
 
@@ -253,6 +259,7 @@ export default function ScanPage() {
     setScanState('idle');
     setPreview(null);
     setResult(null);
+    setIsDemo(false);
     setProgress(0);
     setActiveTab('about');
     if (progressRef.current) clearInterval(progressRef.current);
@@ -341,26 +348,26 @@ export default function ScanPage() {
                 </div>
               </div>
 
-              {/* Action buttons */}
+              {/* Action buttons — BUG 6 FIX: Use open() from useDropzone instead of getRootProps()      */}
+              {/* on each button. Spreading getRootProps() on 3 elements causes 3 simultaneous dialogs. */}
               <div className="flex gap-3 mt-4">
                 <motion.button
-                  {...(getRootProps() as any)}
+                  type="button"
+                  onClick={open}
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.96 }}
                   className="flex-1 flex items-center justify-center gap-2 bg-primary text-white font-poppins font-semibold py-3 px-4 rounded-full shadow-card hover:shadow-card-hover transition-all"
                 >
-                  <input {...getInputProps()} />
                   <Camera size={20} weight="fill" />
-                  <span className="sm:hidden">Take Photo</span>
-                  <span className="hidden sm:inline">Take Photo</span>
+                  Take / Upload Photo
                 </motion.button>
                 <motion.button
-                  {...(getRootProps() as any)}
+                  type="button"
+                  onClick={open}
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.96 }}
                   className="flex-1 flex items-center justify-center gap-2 btn-secondary"
                 >
-                  <input {...getInputProps()} />
                   <ImageIcon size={20} weight="fill" />
                   Browse Gallery
                 </motion.button>
@@ -525,9 +532,25 @@ export default function ScanPage() {
               key="result"
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45, }}
+              transition={{ duration: 0.45 }}
               className="flex flex-col gap-5"
             >
+              {/* BUG 4 FIX: Demo mode disclaimer banner */}
+              {isDemo && (
+                <motion.div
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-amber-50 border border-amber-300 rounded-xl p-3 flex items-start gap-2"
+                >
+                  <WarningCircle size={18} weight="fill" className="text-amber-600 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-poppins font-semibold text-amber-800">Demo Result</p>
+                    <p className="text-xs font-noto text-amber-700 mt-0.5">
+                      AI model is loading. Showing sample result for Tomato Late Blight. Upload a clear leaf photo for accurate diagnosis.
+                    </p>
+                  </div>
+                </motion.div>
+              )}
               {/* Image with simulated affected area overlay */}
               {preview && (
                 <div className="relative rounded-lg overflow-hidden shadow-card">

@@ -1,8 +1,29 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { PageWrapper, AnimatedSection } from '../components/ui/PageWrapper';
 import { User, MapPin, PencilSimple, Translate, Bell, WifiHigh, Moon, Question, PhoneCall, Star, ShareNetwork, SignOut, CaretRight } from 'phosphor-react';
+import { useAppStore } from '../store/appStore';
+
+const LANGUAGE_LABELS: Record<string, string> = {
+  en: 'English', hi: 'हिंदी', kn: 'ಕನ್ನಡ', te: 'తెలుగు', ta: 'தமிழ்', mr: 'मराठी',
+};
 
 export default function ProfilePage() {
+  const navigate = useNavigate();
+  const farmer = useAppStore((s) => s.farmer);
+  const language = useAppStore((s) => s.language);
+  const logout = useAppStore((s) => s.logout);
+
+  const name = farmer?.name ?? 'Farmer';
+  const phone = farmer?.phone ? `+91 ${farmer.phone}` : 'Not set';
+  const location = farmer?.district && farmer?.state ? `${farmer.district}, ${farmer.state}` : 'Location not set';
+  const initials = name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase();
+
+  const handleSignOut = () => {
+    logout();
+    navigate('/login', { replace: true });
+  };
+
   const [notifications, setNotifications] = useState(true);
   const [offlineMode, setOfflineMode] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
@@ -12,13 +33,13 @@ export default function ProfilePage() {
       {/* Header Profile Section */}
       <AnimatedSection custom={0} className="bg-white rounded-2xl p-5 shadow-sm mb-4 flex items-center space-x-4 border border-[#E8F5E9]">
         <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#2E7D32] to-[#4CAF50] flex items-center justify-center text-white text-2xl font-bold font-poppins shadow-md">
-          RK
+          {initials || <User size={28} weight="fill" />}
         </div>
         <div className="flex-1">
-          <h1 className="text-xl font-bold text-[#1B2B1D] font-poppins">Ramesh Kumar</h1>
-          <p className="text-[#546E7A] text-sm">+91 98765 43210</p>
+          <h1 className="text-xl font-bold text-[#1B2B1D] font-poppins">{name}</h1>
+          <p className="text-[#546E7A] text-sm">{phone}</p>
           <div className="flex items-center text-[#546E7A] text-sm mt-1">
-            <MapPin size={14} className="mr-1 text-[#2E7D32]" /> Dharwad, Karnataka
+            <MapPin size={14} className="mr-1 text-[#2E7D32]" /> {location}
           </div>
         </div>
         <button className="p-2 bg-[#F1F8E9] text-[#2E7D32] rounded-full hover:bg-[#E8F5E9] transition-colors">
@@ -54,7 +75,7 @@ export default function ProfilePage() {
             <span className="text-[#1B2B1D] font-medium text-sm">Language</span>
           </div>
           <div className="flex items-center space-x-2">
-            <span className="text-[#546E7A] text-sm">English</span>
+            <span className="text-[#546E7A] text-sm">{LANGUAGE_LABELS[language ?? 'en'] ?? 'English'}</span>
             <CaretRight size={16} className="text-gray-400" />
           </div>
         </div>
@@ -133,7 +154,10 @@ export default function ProfilePage() {
 
       {/* Sign Out Button */}
       <AnimatedSection custom={4}>
-        <button className="w-full py-3.5 border-2 border-red-500 text-red-500 rounded-xl font-semibold flex items-center justify-center space-x-2 hover:bg-red-50 active:scale-[0.98] transition-all">
+        <button
+          onClick={handleSignOut}
+          className="w-full py-3.5 border-2 border-red-500 text-red-500 rounded-xl font-semibold flex items-center justify-center space-x-2 hover:bg-red-50 active:scale-[0.98] transition-all"
+        >
           <SignOut weight="bold" size={20} />
           <span>Sign Out</span>
         </button>

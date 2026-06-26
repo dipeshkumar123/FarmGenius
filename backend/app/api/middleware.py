@@ -66,9 +66,11 @@ def setup_middleware(app: FastAPI):
         allow_origins=[
             "http://localhost:5173", 
             "http://localhost:3000",
-            "https://frontend-pi-liart-51.vercel.app"
+            "https://frontend-pi-liart-51.vercel.app",
+            "https://farmgenius-monorepo.vercel.app",
+            "https://farmgenius-monorepo-*.vercel.app",
         ],
-        allow_origin_regex=r"https://frontend-.*\.vercel\.app",
+        allow_origin_regex=r"https://(frontend-.*|farmgenius-monorepo.*)\.vercel\.app",
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],

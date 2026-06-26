@@ -23,6 +23,7 @@ import {
 } from 'phosphor-react';
 import { useAppStore } from '../store/appStore';
 import PageWrapper from '../components/ui/PageWrapper';
+import apiClient from '../api/client';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -222,17 +223,35 @@ export default function DashboardPage() {
   const district    = farmer?.district ?? 'Dharwad';
   const state       = farmer?.state ?? 'Karnataka';
 
-  // Simulate weather fetch
+  // BUG 11 FIX: Call real weather API instead of fake setTimeout + MOCK_WEATHER
   const fetchWeather = useCallback(async () => {
     setWeatherLoading(true);
     try {
-      // Simulate network latency; swap with real API call when backend is live
-      await new Promise((r) => setTimeout(r, 1200));
+      const res = await apiClient.get('/weather', {
+        params: { district, state },
+      });
+      const data = res.data;
+      if (data && data.length > 0) {
+        const today = data[0];
+        const rain = today.rainfall_mm;
+        const temp = today.max_temp;
+        setWeather({
+          temp: Math.round(temp),
+          condition: rain > 20 ? 'Heavy Rain' : rain > 5 ? 'Partly Cloudy' : temp > 35 ? 'Sunny & Hot' : 'Partly Cloudy',
+          humidity: 65, // Not provided by Open-Meteo daily free tier
+          windKph: Math.round(today.wind_kmh),
+          advisory: today.farming_advisory,
+          emoji: rain > 20 ? '🌧️' : rain > 5 ? '🌥️' : temp > 35 ? '☀️' : '⛅',
+        });
+      } else {
+        setWeather(MOCK_WEATHER);
+      }
+    } catch {
       setWeather(MOCK_WEATHER);
     } finally {
       setWeatherLoading(false);
     }
-  }, []);
+  }, [district, state]);
 
   useEffect(() => {
     fetchWeather();

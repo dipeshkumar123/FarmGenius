@@ -1,5 +1,5 @@
 // src/pages/MarketPage.tsx
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   MagnifyingGlass,
@@ -21,6 +21,8 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import PageWrapper from '../components/ui/PageWrapper';
+import { useAppStore } from '../store/appStore';
+import apiClient from '../api/client';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -237,14 +239,63 @@ function CommodityCard({
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function MarketPage() {
+  const farmer = useAppStore((s) => s.farmer);
+  const district = farmer?.district ?? 'Dharwad';
+  const state = farmer?.state ?? 'Karnataka';
+
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState<Category>('All');
   const [sortBy, setSortBy] = useState<SortKey>('name');
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [showSort, setShowSort] = useState(false);
+  // BUG 10 FIX: Use real prices state; fall back to mockPrices
+  const [prices, setPrices] = useState<CommodityPrice[]>(mockPrices);
+  const [priceError, setPriceError] = useState(false);
+
+  // Fetch prices for a set of common crops on mount
+  useEffect(() => {
+    const crops = ['Wheat', 'Maize', 'Soybean', 'Rice', 'Tomato', 'Onion', 'Cotton', 'Chickpea'];
+    let cancelled = false;
+    const fetched: CommodityPrice[] = [];
+
+    Promise.all(
+      crops.map((crop, idx) =>
+        apiClient
+          .get('/prices', { params: { commodity: crop, district, state } })
+          .then((res) => {
+            const d = res.data;
+            if (d && d.modal_price > 0) {
+              const base = mockPrices.find((m) => m.name.toLowerCase() === crop.toLowerCase());
+              fetched.push({
+                id: idx + 1,
+                name: crop,
+                emoji: base?.emoji ?? '🌿',
+                price: Math.round(d.modal_price),
+                change: base?.change ?? 0,
+                changePercent: base?.changePercent ?? 0,
+                market: `${district} APMC`,
+                state,
+                category: base?.category ?? 'Others',
+                unit: d.unit ?? 'quintal',
+                updated: 'Just now',
+              });
+            }
+          })
+          .catch(() => {})
+      )
+    ).then(() => {
+      if (!cancelled && fetched.length > 0) {
+        setPrices(fetched);
+      } else if (!cancelled) {
+        setPriceError(true);
+      }
+    });
+
+    return () => { cancelled = true; };
+  }, [district, state]);
 
   const filtered = useMemo(() => {
-    let data = mockPrices;
+    let data = prices;
     if (search) {
       data = data.filter((d) => d.name.toLowerCase().includes(search.toLowerCase()));
     }
@@ -257,7 +308,7 @@ export default function MarketPage() {
       if (sortBy === 'change') return Math.abs(b.changePercent) - Math.abs(a.changePercent);
       return 0;
     });
-  }, [search, category, sortBy]);
+  }, [search, category, sortBy, prices]);
 
   const sortLabels: Record<SortKey, string> = {
     name: 'By Name',
@@ -275,9 +326,21 @@ export default function MarketPage() {
       >
         <h1 className="font-poppins font-bold text-2xl text-text-primary">📊 Market Prices</h1>
         <p className="text-text-secondary font-noto text-sm mt-0.5">
-          Live mandi rates • Karnataka APMCs
+          Live mandi rates • {district} APMC
         </p>
       </motion.div>
+
+      {/* BUG 10: Show "Using cached data" when real API isn't available */}
+      {priceError && (
+        <motion.div
+          initial={{ opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-3 bg-amber-50 border border-amber-300 rounded-xl p-3 flex items-center gap-2 text-sm"
+        >
+          <span>📡</span>
+          <span className="font-noto text-amber-800">Using reference prices — live data unavailable.</span>
+        </motion.div>
+      )}
 
       {/* Search bar */}
       <motion.div

@@ -1,6 +1,11 @@
 import os
-import joblib
-import numpy as np
+
+try:
+    import joblib
+    import numpy as np
+    ML_AVAILABLE = True
+except ImportError:
+    ML_AVAILABLE = False
 
 class CropService:
     def __init__(self):
@@ -9,6 +14,8 @@ class CropService:
         self._load_model()
 
     def _load_model(self):
+        if not ML_AVAILABLE:
+            return
         model_path = os.path.join(os.path.dirname(__file__), "..", "..", "models", "crop_recommendation_model.pkl")
         if os.path.exists(model_path):
             try:
@@ -20,7 +27,7 @@ class CropService:
                 print(f"Failed to load crop recommendation model: {e}")
 
     def predict_crop(self, n: float, p: float, k: float, ph: float, ec: float, s: float, cu: float, fe: float, mn: float, zn: float, b: float) -> str:
-        if self.model is None or self.scaler is None:
+        if not ML_AVAILABLE or self.model is None or self.scaler is None:
             return "Model unavailable. Please contact an agronomist."
             
         try:
