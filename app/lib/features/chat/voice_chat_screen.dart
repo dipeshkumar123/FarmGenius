@@ -6,7 +6,9 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:uuid/uuid.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/network/api_service.dart';
+import '../../core/localization/language_service.dart';
 
 // ─── Model ──────────────────────────────────────────────────────────────────
 
@@ -26,14 +28,14 @@ class ChatMessage {
 
 // ─── Screen ─────────────────────────────────────────────────────────────────
 
-class VoiceChatScreen extends StatefulWidget {
+class VoiceChatScreen extends ConsumerStatefulWidget {
   const VoiceChatScreen({Key? key}) : super(key: key);
 
   @override
-  State<VoiceChatScreen> createState() => _VoiceChatScreenState();
+  ConsumerState<VoiceChatScreen> createState() => _VoiceChatScreenState();
 }
 
-class _VoiceChatScreenState extends State<VoiceChatScreen>
+class _VoiceChatScreenState extends ConsumerState<VoiceChatScreen>
     with TickerProviderStateMixin {
   // ── Services ──
   final stt.SpeechToText _speech = stt.SpeechToText();
@@ -161,8 +163,9 @@ class _VoiceChatScreenState extends State<VoiceChatScreen>
     await Future.delayed(const Duration(milliseconds: 1500));
 
     try {
+      final langService = ref.read(languageProvider.notifier);
       final response =
-          await _apiService.sendChatQuery(query, 'hi', 'farmer_001');
+          await _apiService.sendChatQuery(query, langService.apiLanguageCode, 'farmer_001');
       final botText = (response?['response'] as String?) ??
           'मुझे जवाब नहीं मिला। कृपया फिर से पूछें।';
       setState(() => _isTyping = false);
@@ -288,38 +291,43 @@ class _VoiceChatScreenState extends State<VoiceChatScreen>
         ],
       ),
       actions: [
-        PopupMenuButton<String>(
-          onSelected: (lang) => setState(() => _selectedLanguage = lang),
-          itemBuilder: (_) => const [
-            PopupMenuItem(value: 'हिंदी', child: Text('हिंदी')),
-            PopupMenuItem(value: 'English', child: Text('English')),
-            PopupMenuItem(value: 'ಕನ್ನಡ', child: Text('ಕನ್ನಡ')),
-            PopupMenuItem(value: 'తెలుగు', child: Text('తెలుగు')),
-            PopupMenuItem(value: 'मराठी', child: Text('मराठी')),
-          ],
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: const Color(0xFFE8F5E9),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.translate_rounded, color: _green, size: 16),
-                const SizedBox(width: 4),
-                Text(
-                  _selectedLanguage,
-                  style: const TextStyle(
-                    color: _green,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+        Consumer(
+          builder: (context, ref, child) {
+            final langService = ref.watch(languageProvider.notifier);
+            return PopupMenuButton<String>(
+              onSelected: (lang) => langService.setLanguage(lang),
+              itemBuilder: (_) => const [
+                PopupMenuItem(value: 'English', child: Text('English')),
+                PopupMenuItem(value: 'हिंदी', child: Text('हिंदी')),
+                PopupMenuItem(value: 'ಕನ್ನಡ', child: Text('ಕನ್ನಡ')),
+                PopupMenuItem(value: 'తెలుగు', child: Text('తెలుగు')),
+                PopupMenuItem(value: 'मराठी', child: Text('मराठी')),
               ],
-            ),
-          ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE8F5E9),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.translate_rounded, color: _green, size: 16),
+                    const SizedBox(width: 4),
+                    Text(
+                      langService.currentLanguage,
+                      style: const TextStyle(
+                        color: _green,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
         ),
         const SizedBox(width: 4),
       ],

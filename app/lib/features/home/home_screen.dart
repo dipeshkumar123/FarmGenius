@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/network/api_service.dart';
+import '../../core/localization/language_service.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _selectedIndex = 0;
   final ApiService _apiService = ApiService();
   bool _isLoading = true;
@@ -44,36 +46,42 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
 
   // ─── Quick actions ────────────────────────────────────────────────────────
-  final List<_QuickAction> _actions = const [
+  List<_QuickAction> _getActions(String Function(String) translate) => [
     _QuickAction(
-      label: 'Crop Rec.',
+      label: translate('crop_rec'),
       icon: Icons.grass_rounded,
-      color: Color(0xFF43A047),
+      color: const Color(0xFF43A047),
       route: '/crop',
     ),
     _QuickAction(
-      label: 'Scan Disease',
+      label: translate('scan_disease'),
       icon: Icons.camera_alt_rounded,
-      color: Color(0xFFEF6C00),
+      color: const Color(0xFFEF6C00),
       route: '/scan',
     ),
     _QuickAction(
-      label: 'Ask AI',
+      label: translate('ask_ai'),
       icon: Icons.smart_toy_rounded,
-      color: Color(0xFF1565C0),
+      color: const Color(0xFF1565C0),
       route: '/chat',
     ),
     _QuickAction(
-      label: 'Mandi Prices',
+      label: translate('mandi_prices'),
       icon: Icons.store_rounded,
-      color: Color(0xFF6A1B9A),
+      color: const Color(0xFF6A1B9A),
       route: '/market',
     ),
     _QuickAction(
-      label: 'Weather',
+      label: translate('weather'),
       icon: Icons.cloud_rounded,
-      color: Color(0xFF00838F),
+      color: const Color(0xFF00838F),
       route: '/weather',
+    ),
+    _QuickAction(
+      label: translate('schemes'),
+      icon: Icons.description_rounded,
+      color: const Color(0xFF00796B),
+      route: '/schemes',
     ),
   ];
 
@@ -109,6 +117,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // ─── Section A: Header ────────────────────────────────────────────────────
   Widget _buildHeader() {
+    final langService = ref.watch(languageProvider.notifier);
+    
     return Container(
       color: Colors.white,
       child: SafeArea(
@@ -122,7 +132,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Good Morning, Kisan Bhai! 🌾',
+                      langService.translate('good_morning'),
                       style: GoogleFonts.poppins(
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
@@ -150,12 +160,40 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
               ),
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.notifications_outlined),
-                color: const Color(0xFF1B2B1D),
+              PopupMenuButton<String>(
+                onSelected: (lang) => langService.setLanguage(lang),
+                itemBuilder: (_) => const [
+                  PopupMenuItem(value: 'English', child: Text('English')),
+                  PopupMenuItem(value: 'हिंदी', child: Text('हिंदी')),
+                  PopupMenuItem(value: 'ಕನ್ನಡ', child: Text('ಕನ್ನಡ')),
+                  PopupMenuItem(value: 'తెలుగు', child: Text('తెలుగు')),
+                  PopupMenuItem(value: 'मराठी', child: Text('मराठी')),
+                ],
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE8F5E9),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.translate_rounded, color: Color(0xFF2E7D32), size: 16),
+                      const SizedBox(width: 4),
+                      Text(
+                        langService.currentLanguage,
+                        style: const TextStyle(
+                          color: Color(0xFF2E7D32),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              const SizedBox(width: 4),
+              const SizedBox(width: 8),
               CircleAvatar(
                 radius: 20,
                 backgroundColor: const Color(0xFF2E7D32).withOpacity(0.15),
@@ -302,13 +340,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // ─── Section C: Quick Actions ─────────────────────────────────────────────
   Widget _buildQuickActions() {
+    final langService = ref.watch(languageProvider.notifier);
+    final actions = _getActions(langService.translate);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
           child: Text(
-            'Quick Actions',
+            langService.translate('quick_actions'),
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w700,
                   color: const Color(0xFF1B2B1D),
@@ -324,9 +365,9 @@ class _HomeScreenState extends State<HomeScreen> {
           childAspectRatio: 0.9,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          children: List.generate(_actions.length, (index) {
+          children: List.generate(actions.length, (index) {
             return _QuickActionCard(
-              action: _actions[index],
+              action: actions[index],
               delay: 200 + (index * 80),
             );
           }),
@@ -337,13 +378,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // ─── Section D: Market Prices ─────────────────────────────────────────────
   Widget _buildMarketPrices() {
+    final langService = ref.watch(languageProvider.notifier);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.only(left: 16, top: 16, bottom: 8),
           child: Text(
-            "Today's Market Prices",
+            langService.translate('today_prices'),
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w700,
                   color: const Color(0xFF1B2B1D),

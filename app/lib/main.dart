@@ -12,6 +12,8 @@ import 'features/chat/voice_chat_screen.dart';
 import 'features/disease/disease_detect_screen.dart';
 import 'features/market/mandi_prices_screen.dart';
 import 'features/weather/weather_screen.dart';
+import 'features/crop/crop_recommendation_screen.dart';
+import 'features/schemes/schemes_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -68,6 +70,8 @@ class FarmGeniusApp extends StatelessWidget {
         '/scan':     (_) => const DiseaseDetectScreen(),
         '/market':   (_) => const MandiPricesScreen(),
         '/weather':  (_) => const WeatherScreen(),
+        '/crop':     (_) => const CropRecommendationScreen(),
+        '/schemes':  (_) => const SchemesScreen(),
       },
 
       // Custom page transition — subtle fade for a polished feel.
@@ -81,6 +85,8 @@ class FarmGeniusApp extends StatelessWidget {
           '/scan':       const DiseaseDetectScreen(),
           '/market':     const MandiPricesScreen(),
           '/weather':    const WeatherScreen(),
+          '/crop':       const CropRecommendationScreen(),
+          '/schemes':    const SchemesScreen(),
         };
 
         final page = routes[settings.name];

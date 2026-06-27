@@ -210,22 +210,56 @@ class ApiService {
     }
   }
 
+  // ─── Schemes ──────────────────────────────────────────────────────────────
+
+  Future<List<dynamic>?> fetchSchemes(String? crop, String? state) async {
+    try {
+      final queryParams = <String, dynamic>{};
+      if (crop != null && crop.isNotEmpty) queryParams['crop'] = crop;
+      if (state != null && state.isNotEmpty) queryParams['state'] = state;
+
+      final response = await _dio.get(
+        '/schemes',
+        queryParameters: queryParams,
+      );
+      return response.data as List<dynamic>?;
+    } on DioException {
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  // ─── Crop Recommendation ──────────────────────────────────────────────────
+
+  Future<Map<String, dynamic>?> recommendCrop({
+    required String location,
+    required String soilType,
+    required String waterAvailability,
+    required String farmSize,
+    required String season,
+  }) async {
+    try {
+      final response = await _dio.post(
+        '/crop/recommend',
+        data: {
+          'location': location,
+          'soil_type': soilType,
+          'water_availability': waterAvailability,
+          'farm_size': farmSize,
+          'season': season,
+        },
+      );
+      return response.data as Map<String, dynamic>?;
+    } on DioException {
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
   // ─── Disease detection ────────────────────────────────────────────────────
 
-  /// Sends a crop image to the backend for server-side disease detection.
-  ///
-  /// This is the *online fallback*; primary detection runs on-device via TFLite.
-  /// [imageBytes] should be the raw bytes of a JPEG or PNG image (≤ 5 MB).
-  ///
-  /// Expected response shape:
-  /// ```json
-  /// {
-  ///   "disease_name": "Tomato___Early_blight",
-  ///   "confidence": 0.94,
-  ///   "treatment": "Apply Mancozeb @ 2g/L...",
-  ///   "source_kvk": "ICAR-IIHR Bengaluru"
-  /// }
-  /// ```
   Future<Map<String, dynamic>?> detectDisease(Uint8List imageBytes) async {
     try {
       final formData = FormData.fromMap({
@@ -240,7 +274,6 @@ class ApiService {
         '/disease/detect',
         data: formData,
         options: Options(
-          // Override Content-Type — Dio sets multipart/form-data automatically.
           headers: {
             'ngrok-skip-browser-warning': 'true',
           },
