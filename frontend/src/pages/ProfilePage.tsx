@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PageWrapper, AnimatedSection } from '../components/ui/PageWrapper';
 import { User, MapPin, PencilSimple, Translate, Bell, WifiHigh, Moon, Question, PhoneCall, Star, ShareNetwork, SignOut, CaretRight } from 'phosphor-react';
+import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../store/appStore';
 
 const LANGUAGE_LABELS: Record<string, string> = {
@@ -10,13 +11,14 @@ const LANGUAGE_LABELS: Record<string, string> = {
 
 export default function ProfilePage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const farmer = useAppStore((s) => s.farmer);
   const language = useAppStore((s) => s.language);
   const logout = useAppStore((s) => s.logout);
 
   const name = farmer?.name ?? 'Farmer';
-  const phone = farmer?.phone ? `+91 ${farmer.phone}` : 'Not set';
-  const location = farmer?.district && farmer?.state ? `${farmer.district}, ${farmer.state}` : 'Location not set';
+  const phone = farmer?.phone ? `+91 ${farmer.phone}` : t('profile.not_set');
+  const location = farmer?.district && farmer?.state ? `${farmer.district}, ${farmer.state}` : t('profile.location_not_set');
   const initials = name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase();
 
   const handleSignOut = () => {
@@ -51,9 +53,9 @@ export default function ProfilePage() {
       <AnimatedSection custom={1} className="bg-white rounded-2xl p-4 shadow-sm mb-4 border border-[#E8F5E9]">
         <div className="flex justify-between items-center mb-3">
           <h2 className="text-base font-semibold text-[#1B2B1D] font-poppins flex items-center">
-            <span className="text-xl mr-2">🚜</span> My Farm
+            <span className="text-xl mr-2">🚜</span> {t('profile.my_farm')}
           </h2>
-          <button className="text-sm text-[#2E7D32] font-medium">Edit</button>
+          <button className="text-sm text-[#2E7D32] font-medium">{t('profile.edit')}</button>
         </div>
         <div className="flex flex-wrap gap-2">
           {['Paddy (🌾)', 'Cotton (🧶)', 'Tomato (🍅)'].map((crop, idx) => (
@@ -62,7 +64,7 @@ export default function ProfilePage() {
             </span>
           ))}
           <button className="bg-gray-50 text-[#546E7A] px-3 py-1.5 rounded-full text-sm font-medium border border-dashed border-gray-300 hover:bg-gray-100 flex items-center">
-            + Add Crop
+            {t('profile.add_crop')}
           </button>
         </div>
       </AnimatedSection>
@@ -72,7 +74,7 @@ export default function ProfilePage() {
         <div className="p-3 flex items-center justify-between border-b border-gray-50 cursor-pointer hover:bg-gray-50 rounded-t-xl transition-colors">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-500"><Translate size={18} weight="fill" /></div>
-            <span className="text-[#1B2B1D] font-medium text-sm">Language</span>
+            <span className="text-[#1B2B1D] font-medium text-sm">{t('profile.language')}</span>
           </div>
           <div className="flex items-center space-x-2">
             <span className="text-[#546E7A] text-sm">{LANGUAGE_LABELS[language ?? 'en'] ?? 'English'}</span>
@@ -83,7 +85,7 @@ export default function ProfilePage() {
         <div className="p-3 flex items-center justify-between border-b border-gray-50">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 rounded-full bg-orange-50 flex items-center justify-center text-orange-500"><Bell size={18} weight="fill" /></div>
-            <span className="text-[#1B2B1D] font-medium text-sm">Notifications</span>
+            <span className="text-[#1B2B1D] font-medium text-sm">{t('profile.notifications')}</span>
           </div>
           <label className="relative inline-flex items-center cursor-pointer">
             <input type="checkbox" className="sr-only peer" checked={notifications} onChange={() => setNotifications(!notifications)} />
@@ -95,8 +97,8 @@ export default function ProfilePage() {
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 rounded-full bg-green-50 flex items-center justify-center text-[#2E7D32]"><WifiHigh size={18} weight="fill" /></div>
             <div>
-              <span className="text-[#1B2B1D] font-medium text-sm block">Offline Mode</span>
-              <span className="text-xs text-[#546E7A]">Save disease models for offline use</span>
+              <span className="text-[#1B2B1D] font-medium text-sm block">{t('profile.offline_mode')}</span>
+              <span className="text-xs text-[#546E7A]">{t('profile.offline_desc')}</span>
             </div>
           </div>
           <label className="relative inline-flex items-center cursor-pointer">
@@ -108,7 +110,7 @@ export default function ProfilePage() {
         <div className="p-3 flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-700"><Moon size={18} weight="fill" /></div>
-            <span className="text-[#1B2B1D] font-medium text-sm">Dark Mode</span>
+            <span className="text-[#1B2B1D] font-medium text-sm">{t('profile.dark_mode')}</span>
           </div>
           <label className="relative inline-flex items-center cursor-pointer">
             <input type="checkbox" className="sr-only peer" checked={darkMode} onChange={() => setDarkMode(!darkMode)} />
@@ -122,7 +124,7 @@ export default function ProfilePage() {
         <button className="w-full p-3 flex items-center justify-between border-b border-gray-50 hover:bg-gray-50 rounded-t-xl transition-colors">
           <div className="flex items-center space-x-3">
             <Question size={20} className="text-[#546E7A]" weight="regular" />
-            <span className="text-[#1B2B1D] font-medium text-sm">Help & FAQ</span>
+            <span className="text-[#1B2B1D] font-medium text-sm">{t('profile.help')}</span>
           </div>
           <CaretRight size={16} className="text-gray-400" />
         </button>
@@ -131,7 +133,7 @@ export default function ProfilePage() {
           <div className="flex items-center space-x-3">
             <PhoneCall size={20} className="text-[#2E7D32]" weight="fill" />
             <div className="text-left">
-              <span className="text-[#1B2B1D] font-medium text-sm block">Kisan Helpline</span>
+              <span className="text-[#1B2B1D] font-medium text-sm block">{t('profile.helpline')}</span>
               <span className="text-xs text-[#546E7A]">1800-180-1551 (Toll Free)</span>
             </div>
           </div>
@@ -140,14 +142,14 @@ export default function ProfilePage() {
         <button className="w-full p-3 flex items-center justify-between border-b border-gray-50 hover:bg-gray-50 transition-colors">
           <div className="flex items-center space-x-3">
             <Star size={20} className="text-[#F9A825]" weight="fill" />
-            <span className="text-[#1B2B1D] font-medium text-sm">Rate App</span>
+            <span className="text-[#1B2B1D] font-medium text-sm">{t('profile.rate')}</span>
           </div>
         </button>
 
         <button className="w-full p-3 flex items-center justify-between hover:bg-gray-50 rounded-b-xl transition-colors">
           <div className="flex items-center space-x-3">
             <ShareNetwork size={20} className="text-blue-500" weight="bold" />
-            <span className="text-[#1B2B1D] font-medium text-sm">Share with a Farmer</span>
+            <span className="text-[#1B2B1D] font-medium text-sm">{t('profile.share')}</span>
           </div>
         </button>
       </AnimatedSection>
@@ -159,7 +161,7 @@ export default function ProfilePage() {
           className="w-full py-3.5 border-2 border-red-500 text-red-500 rounded-xl font-semibold flex items-center justify-center space-x-2 hover:bg-red-50 active:scale-[0.98] transition-all"
         >
           <SignOut weight="bold" size={20} />
-          <span>Sign Out</span>
+          <span>{t('profile.sign_out')}</span>
         </button>
         <p className="text-center text-xs text-[#546E7A] mt-4 font-medium">FarmGenius v1.0.0 (Beta)</p>
       </AnimatedSection>

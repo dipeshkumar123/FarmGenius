@@ -1,6 +1,7 @@
 // src/store/appStore.ts
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import i18n from '../i18n';
 
 interface FarmerProfile {
   name: string;
@@ -32,7 +33,10 @@ export const useAppStore = create<AppState>()(
       isOffline: false,
       setAuthenticated: (v) => set({ isAuthenticated: v }),
       setFarmer: (f) => set({ farmer: f }),
-      setLanguage: (l) => set({ language: l }),
+      setLanguage: (l) => {
+        i18n.changeLanguage(l);
+        set({ language: l });
+      },
       setOffline: (v) => set({ isOffline: v }),
       logout: () => {
         localStorage.removeItem('fg_token');

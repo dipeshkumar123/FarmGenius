@@ -1,6 +1,7 @@
 // src/components/ui/EmptyState.tsx
 import { motion } from 'framer-motion';
 import { ArrowClockwise } from 'phosphor-react';
+import { useTranslation } from 'react-i18next';
 
 // ─────────────────────────────────────────────────────────────
 // Types
@@ -161,6 +162,7 @@ export function EmptyState({
   variant = 'default',
   className = '',
 }: EmptyStateProps) {
+  const { t } = useTranslation();
   const styles = variantStyles[variant];
 
   return (
@@ -232,7 +234,7 @@ export function EmptyState({
                   >
                     <ArrowClockwise size={16} weight="bold" />
                   </motion.span>
-                  <span>Loading…</span>
+                  <span>{t('components.empty_state.loading', 'Loading…')}</span>
                 </>
               ) : (
                 actionLabel
@@ -273,9 +275,11 @@ interface NetworkErrorProps {
 export function NetworkError({
   onRetry,
   isRetrying = false,
-  message = 'Could not connect to the server. Please check your internet connection and try again.',
+  message,
   className = '',
 }: NetworkErrorProps) {
+  const { t } = useTranslation();
+  const displayMessage = message ?? t('components.empty_state.default_network_error', 'Could not connect to the server. Please check your internet connection and try again.');
   // Dynamic import to avoid circular deps — use inline SVG for error icon
   const ErrorIcon = (
     <svg
@@ -299,9 +303,9 @@ export function NetworkError({
   return (
     <EmptyState
       icon={ErrorIcon}
-      title="Something went wrong"
-      description={message}
-      actionLabel={isRetrying ? 'Trying again…' : 'Try Again'}
+      title={t('components.empty_state.something_went_wrong', 'Something went wrong')}
+      description={displayMessage}
+      actionLabel={isRetrying ? t('components.empty_state.trying_again', 'Trying again…') : t('components.empty_state.try_again', 'Try Again')}
       onAction={onRetry}
       isLoading={isRetrying}
       variant="error"
@@ -323,6 +327,7 @@ interface NoResultsProps {
  * NoResults — pre-configured EmptyState for empty search results.
  */
 export function NoResults({ query, onClear, className = '' }: NoResultsProps) {
+  const { t } = useTranslation();
   const SearchIcon = (
     <svg
       width="48"
@@ -348,16 +353,19 @@ export function NoResults({ query, onClear, className = '' }: NoResultsProps) {
     </svg>
   );
 
+  const descriptionText = query
+    ? t('components.empty_state.no_search_match', {
+        query,
+        defaultValue: `We couldn't find anything for "${query}". Try a different crop name or district.`
+      })
+    : t('components.empty_state.no_filters_match', 'No items match your search. Try adjusting your filters.');
+
   return (
     <EmptyState
       icon={SearchIcon}
-      title="No results found"
-      description={
-        query
-          ? `We couldn't find anything for "${query}". Try a different crop name or district.`
-          : 'No items match your search. Try adjusting your filters.'
-      }
-      actionLabel={onClear ? 'Clear Search' : undefined}
+      title={t('components.empty_state.no_results', 'No results found')}
+      description={descriptionText}
+      actionLabel={onClear ? t('components.empty_state.clear_search', 'Clear Search') : undefined}
       onAction={onClear}
       variant="default"
       className={className}

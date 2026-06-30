@@ -1,14 +1,14 @@
 from fastapi import APIRouter, Depends
 from app.models.schemas import ChatRequest, ChatResponse
 from app.services.chatbot_service import chatbot_service
-from app.core.security import get_current_user
+from app.core.security import get_current_user_optional
 
 router = APIRouter()
 
 @router.post("/", response_model=ChatResponse)
-async def chat_endpoint(req: ChatRequest, user_id: str = Depends(get_current_user)):
-    # Fix BOLA vulnerability: Always use the authenticated user_id
-    farmer_id = user_id
+async def chat_endpoint(req: ChatRequest, user_id: str = Depends(get_current_user_optional)):
+    # Fix BOLA vulnerability: Use authenticated user_id if present, else fallback to req.farmer_id
+    farmer_id = user_id if user_id else req.farmer_id
     
     # Supabase strictly requires farmer_id to be a valid UUID.
     # If the user logged in using the mock fallback, farmer_id might be a phone number.

@@ -1,5 +1,6 @@
 // src/pages/ScanPage.tsx
 import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDropzone } from 'react-dropzone';
 import { useNavigate } from 'react-router-dom';
@@ -81,6 +82,7 @@ const mockResult: ScanResult = {
 // ─── Sub-components ──────────────────────────────────────────────────────────
 
 function ConfidenceBar({ value, label }: { value: number; label?: string }) {
+  const { t } = useTranslation();
   const pct = Math.round(value * 100);
   const color = pct >= 85 ? '#2E7D32' : pct >= 70 ? '#F9A825' : '#C62828';
 
@@ -105,7 +107,7 @@ function ConfidenceBar({ value, label }: { value: number; label?: string }) {
       </div>
       {!label && (
         <p className="text-right text-xs font-poppins font-bold mt-1" style={{ color }}>
-          {pct}% confidence
+          {pct}% {t('scan.confidence')}
         </p>
       )}
     </div>
@@ -113,6 +115,7 @@ function ConfidenceBar({ value, label }: { value: number; label?: string }) {
 }
 
 function SeverityBadge({ severity }: { severity: ScanResult['severity'] }) {
+  const { t } = useTranslation();
   const styles: Record<ScanResult['severity'], string> = {
     Mild: 'bg-green-100 text-green-700',
     Moderate: 'bg-amber-100 text-amber-700',
@@ -126,23 +129,25 @@ function SeverityBadge({ severity }: { severity: ScanResult['severity'] }) {
 
   return (
     <span className={`badge ${styles[severity]} text-xs`}>
-      {icons[severity]} {severity}
+      {icons[severity]} {t(`scan.severity.${severity}`)}
     </span>
   );
 }
 
 // ─── Upload tips ──────────────────────────────────────────────────────────────
 
-const tips = [
-  { icon: '☀️', text: 'Good lighting' },
-  { icon: '🍃', text: 'Single leaf' },
-  { icon: '🔍', text: 'Show symptoms' },
+const getTips = (t: any) => [
+  { icon: '☀️', text: t('scan.tips.lighting') },
+  { icon: '🍃', text: t('scan.tips.single') },
+  { icon: '🔍', text: t('scan.tips.symptoms') },
 ];
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function ScanPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
+  const tips = getTips(t);
   const [scanState, setScanState] = useState<ScanState>('idle');
   const [preview, setPreview] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
@@ -275,10 +280,10 @@ export default function ScanPage() {
   };
 
   const tabLabels: { key: ResultTab; label: string }[] = [
-    { key: 'about', label: 'What is this?' },
-    { key: 'actions', label: 'Immediate Actions' },
-    { key: 'treatment', label: 'Treatment' },
-    { key: 'prevention', label: 'Prevention' },
+    { key: 'about', label: t('scan.tabs.about') },
+    { key: 'actions', label: t('scan.tabs.actions') },
+    { key: 'treatment', label: t('scan.tabs.treatment') },
+    { key: 'prevention', label: t('scan.tabs.prevention') },
   ];
 
   const displayResult = result;
@@ -293,10 +298,10 @@ export default function ScanPage() {
           className="mb-6"
         >
           <h1 className="font-poppins font-bold text-2xl text-text-primary">
-            🔬 Crop Disease Scanner
+            {t('scan.title')}
           </h1>
           <p className="text-text-secondary font-noto text-sm mt-0.5">
-            Take or upload a photo of your crop leaf
+            {t('scan.subtitle')}
           </p>
         </motion.div>
 
@@ -332,10 +337,10 @@ export default function ScanPage() {
                 </motion.div>
                 <div>
                   <p className="font-poppins font-semibold text-text-primary text-base">
-                    {isDragActive ? 'Drop your photo here!' : 'Drag a leaf photo here'}
+                    {isDragActive ? t('scan.drag_active') : t('scan.drag_inactive')}
                   </p>
                   <p className="text-text-secondary font-noto text-sm mt-1">
-                    or tap to browse your gallery
+                    {t('scan.browse_gallery')}
                   </p>
                 </div>
                 <div className="flex gap-4 mt-2">
@@ -359,7 +364,7 @@ export default function ScanPage() {
                   className="flex-1 flex items-center justify-center gap-2 bg-primary text-white font-poppins font-semibold py-3 px-4 rounded-full shadow-card hover:shadow-card-hover transition-all"
                 >
                   <Camera size={20} weight="fill" />
-                  Take / Upload Photo
+                  {t('scan.take_photo')}
                 </motion.button>
                 <motion.button
                   type="button"
@@ -369,7 +374,7 @@ export default function ScanPage() {
                   className="flex-1 flex items-center justify-center gap-2 btn-secondary"
                 >
                   <ImageIcon size={20} weight="fill" />
-                  Browse Gallery
+                  {t('scan.browse')}
                 </motion.button>
               </div>
 
@@ -383,10 +388,10 @@ export default function ScanPage() {
                 <Leaf size={22} weight="fill" className="text-primary shrink-0 mt-0.5" />
                 <div>
                   <p className="font-poppins font-semibold text-text-primary text-sm">
-                    22 diseases detected
+                    {t('scan.detected_count')}
                   </p>
                   <p className="text-text-secondary font-noto text-xs mt-0.5">
-                    Covers tomato, potato, rice, wheat, cotton, chickpea &amp; maize
+                    {t('scan.detected_crops')}
                   </p>
                 </div>
               </motion.div>
@@ -417,7 +422,7 @@ export default function ScanPage() {
                 </button>
               </div>
               <p className="text-center font-noto text-text-secondary text-sm">
-                Photo looks good! Ready to scan?
+                {t('scan.looks_good')}
               </p>
               <motion.button
                 whileHover={{ scale: 1.03 }}
@@ -425,10 +430,10 @@ export default function ScanPage() {
                 onClick={startProcessing}
                 className="btn-primary w-full text-base flex items-center justify-center gap-2 py-4"
               >
-                🔬 Analyze Photo
+                {t('scan.analyze')}
               </motion.button>
               <button onClick={reset} className="btn-ghost w-full">
-                Choose a different photo
+                {t('scan.choose_different')}
               </button>
             </motion.div>
           )}
@@ -465,9 +470,9 @@ export default function ScanPage() {
                     transition={{ duration: 2,  repeat: Infinity }}
                     className="w-12 h-12 rounded-full border-4 border-white/30 border-t-white mb-3"
                   />
-                  <p className="font-poppins font-bold text-lg drop-shadow">🔬 Analyzing your crop...</p>
+                  <p className="font-poppins font-bold text-lg drop-shadow">{t('scan.analyzing_title')}</p>
                   <p className="font-noto text-sm text-white/80 drop-shadow">
-                    Checking against 22 known diseases
+                    {t('scan.analyzing_desc')}
                   </p>
                 </div>
               </div>
@@ -475,7 +480,7 @@ export default function ScanPage() {
               {/* Progress bar */}
               <div className="w-full">
                 <div className="flex justify-between text-xs font-noto text-text-secondary mb-1.5">
-                  <span>Analyzing patterns...</span>
+                  <span>{t('scan.analyzing_patterns')}</span>
                   <span className="font-poppins font-bold text-primary">
                     {Math.round(progress)}%
                   </span>
@@ -490,7 +495,7 @@ export default function ScanPage() {
               </div>
 
               <p className="text-text-secondary font-noto text-sm text-center">
-                This usually takes 3–5 seconds
+                {t('scan.takes_time')}
               </p>
             </motion.div>
           )}
@@ -509,9 +514,9 @@ export default function ScanPage() {
                 <WarningCircle size={40} weight="fill" className="text-red-500" />
               </div>
               <div>
-                <h2 className="font-poppins font-bold text-lg text-text-primary">Detection Failed</h2>
+                <h2 className="font-poppins font-bold text-lg text-text-primary">{t('scan.failed_title')}</h2>
                 <p className="font-noto text-sm text-text-secondary mt-1 max-w-xs">
-                  Could not analyze your photo. Please ensure the leaf is clearly visible, well-lit, and try again.
+                  {t('scan.failed_desc')}
                 </p>
               </div>
               <motion.button
@@ -521,7 +526,7 @@ export default function ScanPage() {
                 className="btn-primary w-full flex items-center justify-center gap-2 py-4 text-base"
               >
                 <ArrowCounterClockwise size={20} weight="bold" />
-                Try Again
+                {t('scan.try_again')}
               </motion.button>
             </motion.div>
           )}
@@ -544,9 +549,9 @@ export default function ScanPage() {
                 >
                   <WarningCircle size={18} weight="fill" className="text-amber-600 shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-sm font-poppins font-semibold text-amber-800">Demo Result</p>
+                    <p className="text-sm font-poppins font-semibold text-amber-800">{t('scan.demo_title')}</p>
                     <p className="text-xs font-noto text-amber-700 mt-0.5">
-                      AI model is loading. Showing sample result for Tomato Late Blight. Upload a clear leaf photo for accurate diagnosis.
+                      {t('scan.demo_desc')}
                     </p>
                   </div>
                 </motion.div>
@@ -569,7 +574,12 @@ export default function ScanPage() {
                     >
                       <div className="w-full h-full flex items-center justify-center">
                         <span className="text-red-500 font-poppins font-bold text-xs text-center leading-tight px-1">
-                          Affected<br />Area
+                          {t('scan.affected_area').split(' ').map((word: string, i: number) => (
+                            <React.Fragment key={i}>
+                              {word}
+                              {i < t('scan.affected_area').split(' ').length - 1 && <br />}
+                            </React.Fragment>
+                          ))}
                         </span>
                       </div>
                     </motion.div>
@@ -663,9 +673,9 @@ export default function ScanPage() {
 
                     {activeTab === 'treatment' && (
                       <div className="flex flex-col gap-3">
-                        {displayResult.treatments.map((t, i) => (
+                        {displayResult.treatments.map((trt, i) => (
                           <motion.div
-                            key={t.name}
+                            key={trt.name}
                             initial={{ opacity: 0, y: 12 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: i * 0.1 }}
@@ -674,21 +684,21 @@ export default function ScanPage() {
                             <div className="flex items-center gap-2 mb-2">
                               <Pill size={18} weight="fill" className="text-primary" />
                               <h3 className="font-poppins font-semibold text-text-primary text-sm">
-                                {t.name}
+                                {trt.name}
                               </h3>
                             </div>
                             <div className="grid grid-cols-2 gap-2">
                               <div className="bg-surface-variant rounded-sm p-2">
-                                <p className="text-[10px] font-noto text-text-secondary">Dosage</p>
-                                <p className="text-sm font-poppins font-semibold text-text-primary">{t.dosage}</p>
+                                <p className="text-[10px] font-noto text-text-secondary">{t('scan.dosage')}</p>
+                                <p className="text-sm font-poppins font-semibold text-text-primary">{trt.dosage}</p>
                               </div>
                               <div className="bg-surface-variant rounded-sm p-2">
-                                <p className="text-[10px] font-noto text-text-secondary">Frequency</p>
-                                <p className="text-sm font-poppins font-semibold text-text-primary">{t.frequency}</p>
+                                <p className="text-[10px] font-noto text-text-secondary">{t('scan.frequency')}</p>
+                                <p className="text-sm font-poppins font-semibold text-text-primary">{trt.frequency}</p>
                               </div>
                               <div className="bg-amber-50 rounded-sm p-2 col-span-2">
-                                <p className="text-[10px] font-noto text-amber-700">Estimated Cost</p>
-                                <p className="text-sm font-poppins font-bold text-amber-800">{t.cost}</p>
+                                <p className="text-[10px] font-noto text-amber-700">{t('scan.cost')}</p>
+                                <p className="text-sm font-poppins font-bold text-amber-800">{trt.cost}</p>
                               </div>
                             </div>
                           </motion.div>
@@ -730,7 +740,7 @@ export default function ScanPage() {
                   className="btn-primary w-full flex items-center justify-center gap-2 py-4 text-base"
                 >
                   <Chat size={20} weight="fill" />
-                  Ask AI about this
+                  {t('scan.ask_ai')}
                 </motion.button>
                 <motion.button
                   whileHover={{ scale: 1.02 }}
@@ -739,7 +749,7 @@ export default function ScanPage() {
                   className="btn-secondary w-full flex items-center justify-center gap-2 py-4"
                 >
                   <ArrowCounterClockwise size={20} weight="bold" />
-                  Scan Another
+                  {t('scan.scan_another')}
                 </motion.button>
               </motion.div>
             </motion.div>

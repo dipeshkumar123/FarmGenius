@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom/client';
 import posthog from 'posthog-js';
 import { PostHogProvider } from 'posthog-js/react';
 import App from './App';
+import './i18n';
 import './index.css';
 
 // Initialize PostHog (using dummy fallback if env var is missing)

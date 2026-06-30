@@ -42,7 +42,7 @@ class PriceService:
         
         async with httpx.AsyncClient() as client:
             try:
-                resp = await client.get(url, params=params, timeout=10.0)
+                resp = await client.get(url, params=params, timeout=5.0)
                 data = resp.json()
                 if data.get("records"):
                     record = data["records"][0]
@@ -91,8 +91,11 @@ class PriceService:
             "unit": "Quintal"
         }
         
-        # Store simulated data in-memory cache so it's consistent for 6 hours
-        price_cache[key] = {'timestamp': now, 'data': result}
+        # Store simulated data in-memory cache so it's consistent for 5 minutes instead of 6 hours
+        # Hack: offset timestamp so it expires in 5 minutes (300 seconds)
+        # We need now - cache_entry['timestamp'] > 21600 to expire, 
+        # so timestamp = now - 21600 + 300 = now - 21300
+        price_cache[key] = {'timestamp': now - 21300, 'data': result}
         return result
 
 price_service = PriceService()

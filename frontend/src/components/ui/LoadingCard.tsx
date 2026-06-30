@@ -1,5 +1,5 @@
-// src/components/ui/LoadingCard.tsx
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 // ─────────────────────────────────────────────────────────────
 // Types
@@ -33,6 +33,7 @@ export function LoadingCard({
   className = '',
   showStructure = true,
 }: LoadingCardProps) {
+  const { t } = useTranslation();
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -40,7 +41,7 @@ export function LoadingCard({
       transition={{ duration: 0.3 }}
       className={`bg-white rounded-md overflow-hidden shadow-card ${height} ${className}`}
       aria-busy="true"
-      aria-label="Loading content"
+      aria-label={t('components.loading_card.loading_content', 'Loading content')}
       role="status"
     >
       {showStructure ? (
@@ -169,7 +170,9 @@ interface LoadingPageProps {
 /**
  * LoadingPage — full-screen centred spinner with a friendly message.
  */
-export function LoadingPage({ label = 'Loading…' }: LoadingPageProps) {
+export function LoadingPage({ label }: LoadingPageProps) {
+  const { t } = useTranslation();
+  const displayLabel = label ?? t('components.empty_state.loading', 'Loading…');
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
       {/* Spinning leaf */}
@@ -178,7 +181,7 @@ export function LoadingPage({ label = 'Loading…' }: LoadingPageProps) {
         transition={{ duration: 1.2, repeat: Infinity, }}
         className="w-12 h-12 rounded-full border-4 border-surface-variant border-t-primary"
       />
-      <p className="text-sm font-noto text-text-secondary">{label}</p>
+      <p className="text-sm font-noto text-text-secondary">{displayLabel}</p>
     </div>
   );
 }

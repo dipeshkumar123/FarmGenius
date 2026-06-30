@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace "com.example.farmgenius"
-    compileSdk 35
+    compileSdkVersion 35
     ndkVersion flutter.ndkVersion
 
     androidResources {
@@ -29,8 +29,8 @@ android {
 
     defaultConfig {
         applicationId "com.example.farmgenius"
-        minSdk 26
-        targetSdk flutter.targetSdkVersion
+        minSdkVersion 26
+        targetSdkVersion flutter.targetSdkVersion
         versionCode flutter.versionCode
         versionName flutter.versionName
     }

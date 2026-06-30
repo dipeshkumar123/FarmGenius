@@ -21,6 +21,7 @@ import {
   FileText,
   Check,
 } from 'phosphor-react';
+import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../../store/appStore';
 
 // ─────────────────────────────────────────────────────────────
@@ -49,20 +50,20 @@ interface LanguageOption {
 // Constants
 // ─────────────────────────────────────────────────────────────
 const mobileNavItems: NavItem[] = [
-  { to: '/dashboard', icon: House, label: 'Home' },
-  { to: '/market', icon: ChartLineUp, label: 'Market' },
-  { to: '/scan', icon: Scan, label: 'Scan', isFab: true },
-  { to: '/chat', icon: ChatCircleText, label: 'AI Chat' },
-  { to: '/profile', icon: UserCircle, label: 'Profile' },
+  { to: '/dashboard', icon: House, label: 'nav.home' },
+  { to: '/market', icon: ChartLineUp, label: 'dashboard.actions.market_prices' },
+  { to: '/scan', icon: Scan, label: 'nav.scan' },
+  { to: '/chat', icon: ChatCircleText, label: 'nav.chat' },
+  { to: '/profile', icon: UserCircle, label: 'nav.profile' },
 ];
 
 const desktopNavItems: DesktopNavItem[] = [
-  { to: '/dashboard', icon: House, label: 'Dashboard' },
-  { to: '/chat', icon: ChatCircleText, label: 'AI Chat' },
-  { to: '/market', icon: ChartLineUp, label: 'Market' },
-  { to: '/weather', icon: Sun, label: 'Weather' },
-  { to: '/crops', icon: Flower, label: 'Crops' },
-  { to: '/schemes', icon: FileText, label: 'Schemes' },
+  { to: '/dashboard', icon: House, label: 'nav.home' },
+  { to: '/chat', icon: ChatCircleText, label: 'nav.chat' },
+  { to: '/market', icon: ChartLineUp, label: 'dashboard.actions.market_prices' },
+  { to: '/weather', icon: Sun, label: 'dashboard.actions.weather' },
+  { to: '/crops', icon: Flower, label: 'nav.crops' },
+  { to: '/schemes', icon: FileText, label: 'dashboard.actions.schemes' },
 ];
 
 const languageOptions: LanguageOption[] = [
@@ -80,6 +81,7 @@ const languageOptions: LanguageOption[] = [
 
 /** Offline warning banner that slides down from the top */
 function OfflineBanner() {
+  const { t } = useTranslation();
   return (
     <motion.div
       initial={{ y: -50, opacity: 0 }}
@@ -90,10 +92,10 @@ function OfflineBanner() {
     >
       <WifiSlash size={16} weight="bold" className="shrink-0 text-amber-600" />
       <span className="font-noto">
-        Offline mode — showing cached data
+        {t('dashboard.offline_mode')}
       </span>
       <span className="ml-auto text-xs text-amber-600 font-poppins font-semibold">
-        No Internet
+        {t('dashboard.no_internet')}
       </span>
     </motion.div>
   );
@@ -101,6 +103,7 @@ function OfflineBanner() {
 
 /** Language selector dropdown */
 function LanguageSelector() {
+  const { t } = useTranslation();
   const { language, setLanguage } = useAppStore();
   const [isOpen, setIsOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -124,7 +127,7 @@ function LanguageSelector() {
         className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-variant border border-farm-divider
                    text-sm font-poppins font-semibold text-primary hover:bg-primary hover:text-white
                    transition-all duration-200 active:scale-95 min-h-[36px]"
-        aria-label="Select language"
+        aria-label={t('accessibility.select_language', 'Select language')}
         aria-expanded={isOpen}
       >
         <Globe size={14} weight="bold" />
@@ -170,13 +173,14 @@ function LanguageSelector() {
 
 /** Notification bell with badge */
 function NotificationBell() {
+  const { t } = useTranslation();
   const [hasNew] = useState(true);
   return (
     <button
       className="relative flex items-center justify-center w-9 h-9 rounded-full
                  hover:bg-surface-variant text-text-secondary hover:text-primary
                  transition-all duration-200 active:scale-95"
-      aria-label="Notifications"
+      aria-label={t('accessibility.notifications', 'Notifications')}
     >
       <Bell size={20} weight={hasNew ? 'fill' : 'regular'} />
       {hasNew && (
@@ -196,6 +200,7 @@ function ProfileDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
   const ref = useRef<HTMLDivElement>(null);
+  const { t } = useTranslation();
 
   const initials = farmer?.name
     ? farmer.name.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase()
@@ -217,7 +222,7 @@ function ProfileDropdown() {
         onClick={() => setIsOpen((prev) => !prev)}
         className="flex items-center gap-2 px-2 py-1 rounded-full hover:bg-surface-variant
                    transition-all duration-200 active:scale-95 min-h-[36px]"
-        aria-label="Profile menu"
+        aria-label={t('accessibility.profile_menu', 'Profile menu')}
         aria-expanded={isOpen}
       >
         {/* Avatar circle */}
@@ -227,10 +232,10 @@ function ProfileDropdown() {
         </div>
         <div className="hidden xl:block text-left">
           <p className="text-xs font-poppins font-semibold text-text-primary leading-tight">
-            {farmer?.name ?? 'Farmer'}
+            {farmer?.name ?? t('profile.farmer_fallback', 'Farmer')}
           </p>
           <p className="text-xs text-text-secondary leading-tight">
-            {farmer?.district ?? 'India'}
+            {farmer?.district ?? t('profile.india_fallback', 'India')}
           </p>
         </div>
         <motion.span
@@ -255,7 +260,7 @@ function ProfileDropdown() {
             {/* Profile header */}
             <div className="px-4 py-3 bg-gradient-to-br from-surface-variant to-white border-b border-farm-divider">
               <p className="font-poppins font-semibold text-text-primary text-sm">
-                {farmer?.name ?? 'Farmer'}
+                {farmer?.name ?? t('profile.farmer_fallback', 'Farmer')}
               </p>
               <p className="text-xs text-text-secondary font-noto mt-0.5">
                 {farmer?.phone ?? '+91 XXXXX XXXXX'}
@@ -269,7 +274,7 @@ function ProfileDropdown() {
                          hover:bg-surface-variant transition-colors duration-150"
             >
               <UserCircle size={16} className="text-primary" />
-              My Profile
+              {t('profile.title')}
             </button>
             <button
               onClick={() => { navigate('/profile'); setIsOpen(false); }}
@@ -277,7 +282,7 @@ function ProfileDropdown() {
                          hover:bg-surface-variant transition-colors duration-150"
             >
               <Gear size={16} className="text-text-secondary" />
-              Settings
+              {t('profile.settings')}
             </button>
             <div className="border-t border-farm-divider" />
             <button
@@ -286,7 +291,7 @@ function ProfileDropdown() {
                          hover:bg-red-50 transition-colors duration-150"
             >
               <SignOut size={16} />
-              Sign Out
+              {t('profile.sign_out')}
             </button>
           </motion.div>
         )}
@@ -298,6 +303,7 @@ function ProfileDropdown() {
 /** Desktop top navigation bar — hidden on mobile */
 function TopNavBar() {
   const location = useLocation();
+  const { t } = useTranslation();
 
   return (
     <header className="hidden lg:flex items-center justify-between px-6 py-3 bg-white/90
@@ -307,7 +313,7 @@ function TopNavBar() {
       <NavLink
         to="/dashboard"
         className="flex items-center gap-2 group shrink-0"
-        aria-label="FarmGenius home"
+        aria-label={t('accessibility.home_link', 'FarmGenius home')}
       >
         <div className="w-9 h-9 rounded-md bg-gradient-primary flex items-center justify-center shadow-sm
                         group-hover:shadow-md transition-shadow duration-200">
@@ -319,7 +325,7 @@ function TopNavBar() {
       </NavLink>
 
       {/* ── Center nav links ── */}
-      <nav className="flex items-center gap-1" aria-label="Main navigation">
+      <nav className="flex items-center gap-1" aria-label={t('accessibility.main_navigation', 'Main navigation')}>
         {desktopNavItems.map((item) => {
           const isActive = location.pathname.startsWith(item.to);
           const Icon = item.icon;
@@ -338,7 +344,7 @@ function TopNavBar() {
                 weight={isActive ? 'fill' : 'regular'}
                 className="transition-transform duration-200 group-hover:scale-110"
               />
-              {item.label}
+              {t(item.label)}
               {/* Animated underline indicator */}
               {isActive && (
                 <motion.span
@@ -366,12 +372,13 @@ function TopNavBar() {
 /** Mobile bottom navigation bar — hidden on desktop */
 function BottomNavBar() {
   const location = useLocation();
+  const { t } = useTranslation();
 
   return (
     <nav
       className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md
                  border-t border-farm-divider shadow-[0_-2px_16px_rgba(46,125,50,0.08)]"
-      aria-label="Mobile navigation"
+      aria-label={t('accessibility.mobile_navigation', 'Mobile navigation')}
       style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
     >
       <div className="flex items-end justify-around px-2 pt-1 pb-2">
@@ -386,7 +393,7 @@ function BottomNavBar() {
                 key={item.to}
                 to={item.to}
                 className="flex flex-col items-center gap-1 -mt-5 focus:outline-none"
-                aria-label={item.label}
+                aria-label={t(item.label)}
               >
                 <motion.div
                   whileHover={{ scale: 1.08 }}
@@ -408,7 +415,7 @@ function BottomNavBar() {
                     isActive ? 'text-primary' : 'text-text-secondary'
                   }`}
                 >
-                  {item.label}
+                  {t(item.label)}
                 </span>
               </NavLink>
             );
@@ -421,7 +428,7 @@ function BottomNavBar() {
               to={item.to}
               className="relative flex flex-col items-center gap-1 py-1 px-3 min-w-[52px]
                          focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 rounded-md"
-              aria-label={item.label}
+              aria-label={t(item.label)}
               aria-current={isActive ? 'page' : undefined}
             >
               <motion.div
@@ -450,7 +457,7 @@ function BottomNavBar() {
                   isActive ? 'text-primary' : 'text-text-secondary'
                 }`}
               >
-                {item.label}
+                {t(item.label)}
               </span>
 
               {/* Active dot */}

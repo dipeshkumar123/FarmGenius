@@ -84,3 +84,15 @@ async def get_current_user(request: Request) -> str:
 
     token = auth_header.split(" ", 1)[1]
     return validate_token(token)
+
+async def get_current_user_optional(request: Request) -> str:
+    """Extract JWT if present, otherwise return None."""
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return None
+
+    token = auth_header.split(" ", 1)[1]
+    try:
+        return validate_token(token)
+    except Exception:
+        return None

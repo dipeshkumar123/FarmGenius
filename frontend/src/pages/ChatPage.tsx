@@ -20,6 +20,7 @@ import {
   WifiHigh,
   Robot,
 } from 'phosphor-react';
+import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../store/appStore';
 import { apiClient } from '../api/client';
 
@@ -310,6 +311,7 @@ const LANG_TO_BCP47: Record<string, string> = {
 
 export default function ChatPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const location = useLocation();
   const isOffline = useAppStore((s) => s.isOffline);
   const storedLang = useAppStore((s) => s.language);
@@ -365,7 +367,7 @@ export default function ChatPage() {
         id: uid(),
         sender: 'user',
         timestamp: new Date(),
-        text: text.trim() || 'I uploaded a photo for diagnosis. 📷',
+        text: text.trim() || t('chat.photo_uploaded'),
         imageUrl,
       };
 
@@ -591,7 +593,7 @@ export default function ChatPage() {
               {isOffline ? (
                 <>
                   <WifiX size={10} weight="fill" className="text-farm-error" />
-                  <span>Offline mode</span>
+                  <span>{t('chat.offline')}</span>
                 </>
               ) : (
                 <>
@@ -601,7 +603,7 @@ export default function ChatPage() {
                     className="w-1.5 h-1.5 rounded-full bg-farm-success inline-block"
                   />
                   <WifiHigh size={10} weight="fill" className="text-farm-success" />
-                  <span>Online</span>
+                  <span>{t('chat.online')}</span>
                 </>
               )}
             </p>
@@ -666,7 +668,7 @@ export default function ChatPage() {
           <div className="flex items-center gap-3 mb-6">
             <div className="flex-1 h-px bg-farm-divider" />
             <span className="text-xs font-noto text-text-secondary px-2 flex-shrink-0">
-              Today
+              {t('chat.today')}
             </span>
             <div className="flex-1 h-px bg-farm-divider" />
           </div>
@@ -705,13 +707,13 @@ export default function ChatPage() {
               className="w-3 h-3 rounded-full bg-farm-error"
             />
             <span className="font-noto text-sm text-farm-error font-semibold">
-              Listening… Speak now
+              {t('chat.listening_banner')}
             </span>
             <button
               onClick={toggleRecording}
               className="text-farm-error text-xs font-poppins font-bold underline"
             >
-              Cancel
+              {t('chat.cancel')}
             </button>
           </motion.div>
         )}
@@ -762,8 +764,8 @@ export default function ChatPage() {
               disabled={isLoading || isRecording}
               placeholder={
                 isRecording
-                  ? 'Listening...'
-                  : 'Ask anything about your farm...'
+                  ? t('chat.listening')
+                  : t('chat.placeholder')
               }
               rows={1}
               className="input-field py-2.5 px-4 resize-none overflow-hidden leading-relaxed

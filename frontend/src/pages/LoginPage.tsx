@@ -17,6 +17,7 @@ import {
   Robot,
 } from 'phosphor-react';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../store/appStore';
 import apiClient from '../api/client';
 
@@ -250,6 +251,7 @@ function LeftPanel() {
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { setAuthenticated, setFarmer } = useAppStore();
 
   const [step, setStep] = useState<AuthStep>('phone');
@@ -492,7 +494,7 @@ export default function LoginPage() {
                     custom={0}
                     className="font-poppins font-bold text-text-primary text-2xl sm:text-3xl"
                   >
-                    Welcome back, Farmer! 👋
+                    {t('auth.welcome')}
                   </motion.h1>
                   <motion.p
                     variants={fadeUp}
@@ -501,7 +503,7 @@ export default function LoginPage() {
                     custom={0.08}
                     className="font-noto text-text-secondary text-base mt-1"
                   >
-                    स्वागत है, किसान!
+                    {t('auth.welcome_hi')}
                   </motion.p>
                   <motion.p
                     variants={fadeUp}
@@ -510,14 +512,14 @@ export default function LoginPage() {
                     custom={0.16}
                     className="font-noto text-text-secondary text-sm mt-3 leading-relaxed"
                   >
-                    Enter your mobile number to get started. We'll send you a quick OTP.
+                    {t('auth.enter_desc')}
                   </motion.p>
                 </div>
 
                 {/* Phone input */}
                 <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={0.24}>
                   <label className="font-poppins font-semibold text-text-primary text-sm block mb-2">
-                    Mobile Number
+                    {t('auth.mobile')}
                   </label>
                   <div
                     className={`flex items-center border-2 rounded-xl overflow-hidden transition-colors duration-200 ${
@@ -556,7 +558,7 @@ export default function LoginPage() {
                   </div>
                   {phoneNumber && !isPhoneValid && (
                     <p className="font-noto text-farm-error text-xs mt-1.5 ml-1">
-                      Please enter a valid 10-digit mobile number
+                      {t('auth.invalid_mobile')}
                     </p>
                   )}
                 </motion.div>
@@ -600,13 +602,13 @@ export default function LoginPage() {
                     )}
                   </div>
                   <span id="terms-label" className="font-noto text-text-secondary text-sm leading-relaxed">
-                    I agree to the{' '}
+                    {t('auth.agree')}{' '}
                     <a href="#" className="text-primary underline hover:text-primary-dark">
-                      Terms of Service
+                      {t('auth.terms')}
                     </a>{' '}
-                    and{' '}
+                    {t('auth.and')}{' '}
                     <a href="#" className="text-primary underline hover:text-primary-dark">
-                      Privacy Policy
+                      {t('auth.privacy')}
                     </a>
                   </span>
                 </motion.label>
@@ -630,12 +632,12 @@ export default function LoginPage() {
                   {isLoading ? (
                     <>
                       <Spinner size={20} className="animate-spin" />
-                      Sending OTP...
+                      {t('auth.sending_otp')}
                     </>
                   ) : (
                     <>
                       <DeviceMobile size={20} weight="fill" />
-                      Send OTP
+                      {t('auth.send_otp')}
                       <ArrowRight size={18} weight="bold" />
                     </>
                   )}
@@ -651,7 +653,7 @@ export default function LoginPage() {
                 >
                   <div className="flex-1 h-px bg-farm-divider" />
                   <span className="font-noto text-text-secondary text-sm whitespace-nowrap">
-                    or continue with
+                    {t('auth.or_continue')}
                   </span>
                   <div className="flex-1 h-px bg-farm-divider" />
                 </motion.div>
@@ -675,7 +677,7 @@ export default function LoginPage() {
                     <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
                     <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
                   </svg>
-                  Continue with Google
+                  {t('auth.google')}
                 </motion.button>
 
                 {/* Demo mode */}
@@ -691,7 +693,7 @@ export default function LoginPage() {
                     disabled={isLoading}
                     className="font-noto text-primary text-sm underline underline-offset-2 hover:text-primary-dark transition-colors cursor-pointer"
                   >
-                    🌱 Try Demo (no sign-up needed)
+                    {t('auth.try_demo')}
                   </button>
                 </motion.div>
               </motion.div>
@@ -718,13 +720,13 @@ export default function LoginPage() {
                     className="flex items-center gap-1.5 text-text-secondary hover:text-primary transition-colors mb-4 font-noto text-sm"
                   >
                     <CaretLeft size={16} weight="bold" />
-                    Change number
+                    {t('auth.change_number')}
                   </button>
                   <h1 className="font-poppins font-bold text-text-primary text-2xl sm:text-3xl">
-                    Verify your number
+                    {t('auth.verify_title')}
                   </h1>
                   <p className="font-noto text-text-secondary text-sm mt-2">
-                    We sent a 6-digit OTP to{' '}
+                    {t('auth.verify_desc')}{' '}
                     <span className="font-poppins font-semibold text-text-primary">
                       +91 {phoneNumber}
                     </span>
@@ -746,7 +748,7 @@ export default function LoginPage() {
                       animate={{ opacity: 1, y: 0 }}
                       className="font-noto text-farm-error text-sm text-center mt-3"
                     >
-                      Incorrect OTP. Please check and try again.
+                      {t('auth.invalid_otp')}
                     </motion.p>
                   )}
                 </div>
@@ -755,9 +757,9 @@ export default function LoginPage() {
                 <div className="bg-surface-variant border border-farm-divider rounded-xl px-4 py-3 flex items-start gap-3">
                   <ShieldCheck size={20} weight="fill" className="text-primary shrink-0 mt-0.5" />
                   <p className="font-noto text-text-secondary text-sm leading-relaxed">
-                    Demo mode: enter{' '}
+                    {t('auth.demo_note1')}{' '}
                     <span className="font-poppins font-bold text-primary">123456</span>{' '}
-                    as the OTP to sign in. A real SMS OTP will be used in production.
+                    {t('auth.demo_note2')}
                   </p>
                 </div>
 
@@ -776,12 +778,12 @@ export default function LoginPage() {
                   {isLoading ? (
                     <>
                       <Spinner size={20} className="animate-spin" />
-                      Verifying...
+                      {t('auth.verifying')}
                     </>
                   ) : (
                     <>
                       <ShieldCheck size={20} weight="fill" />
-                      Verify & Sign In
+                      {t('auth.verify')}
                     </>
                   )}
                 </motion.button>
@@ -790,7 +792,7 @@ export default function LoginPage() {
                 <div className="text-center">
                   {countdown > 0 ? (
                     <p className="font-noto text-text-secondary text-sm">
-                      Resend OTP in{' '}
+                      {t('auth.resend_in')}{' '}
                       <span className="font-poppins font-semibold text-primary">{countdown}s</span>
                     </p>
                   ) : (
@@ -798,7 +800,7 @@ export default function LoginPage() {
                       onClick={handleResendOtp}
                       className="font-noto text-primary text-sm underline underline-offset-2 hover:text-primary-dark transition-colors cursor-pointer"
                     >
-                      Resend OTP
+                      {t('auth.resend')}
                     </button>
                   )}
                 </div>

@@ -1,5 +1,6 @@
 // src/pages/MarketPage.tsx
 import React, { useState, useMemo, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   MagnifyingGlass,
@@ -101,6 +102,43 @@ function PriceChange({ change, changePercent }: { change: number; changePercent:
   );
 }
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+const getCropKey = (name: string) => {
+  return name.toLowerCase().replace(/ \((.+)\)/, '_$1').replace(/ /g, '_');
+};
+
+const formatUpdatedTime = (updated: string, t: any) => {
+  const normalized = updated.toLowerCase().trim();
+  if (normalized === 'just now') {
+    return t('components.stale_banner.time.just_now', 'just now');
+  }
+  const matchHours = normalized.match(/^(\d+)\s*h\s*ago$/);
+  if (matchHours) {
+    const count = parseInt(matchHours[1], 10);
+    if (count === 1) {
+      return t('components.stale_banner.time.hour', '1 hour ago');
+    }
+    return t('components.stale_banner.time.hours', { count, defaultValue: `${count} hours ago` });
+  }
+  return updated; // fallback
+};
+
+const translateDay = (day: string, t: any, locale: string) => {
+  if (day.toLowerCase() === 'today') {
+    return t('weather.today', 'Today');
+  }
+  const dayIndexMap: Record<string, number> = {
+    Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6
+  };
+  const idx = dayIndexMap[day];
+  if (idx !== undefined) {
+    const baseDate = new Date(2026, 5, 28 + idx); // June 28, 2026 is Sunday
+    return baseDate.toLocaleDateString(locale, { weekday: 'short' });
+  }
+  return day;
+};
+
 // ─── Commodity Card ───────────────────────────────────────────────────────────
 
 function CommodityCard({
@@ -112,6 +150,16 @@ function CommodityCard({
   isExpanded: boolean;
   onToggle: () => void;
 }) {
+  const { t, i18n } = useTranslation();
+  const localeMap: Record<string, string> = {
+    en: 'en-IN',
+    hi: 'hi-IN',
+    kn: 'kn-IN',
+    te: 'te-IN',
+    ta: 'ta-IN',
+    mr: 'mr-IN',
+  };
+  const currentLocale = localeMap[i18n.language] || 'en-IN';
   const trendData = useMemo(() => generateTrend(item.price, item.change), [item.price, item.change]);
   const trendColor = item.change >= 0 ? '#2E7D32' : '#C62828';
 
@@ -131,20 +179,20 @@ function CommodityCard({
           {item.emoji}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="font-poppins font-semibold text-text-primary text-sm leading-tight">{item.name}</p>
+          <p className="font-poppins font-semibold text-text-primary text-sm leading-tight">{t(`crops.${getCropKey(item.name)}`, item.name)}</p>
           <div className="flex items-center gap-1 mt-0.5">
             <MapPin size={10} className="text-text-secondary" />
-            <p className="text-text-secondary font-noto text-xs truncate">{item.market}</p>
+            <p className="text-text-secondary font-noto text-xs truncate">{item.market.replace(/\s*APMC/g, ` ${t('market.apmc_suffix', 'APMC')}`)}</p>
           </div>
         </div>
         {/* Right: price + change */}
         <div className="text-right shrink-0">
           <p className="font-poppins font-bold text-text-primary text-base">
             ₹{item.price.toLocaleString('en-IN')}
-            <span className="text-xs font-noto text-text-secondary font-normal">/{item.unit}</span>
+            <span className="text-xs font-noto text-text-secondary font-normal">/{t(`market.unit.${item.unit}`, item.unit)}</span>
           </p>
           <PriceChange change={item.change} changePercent={item.changePercent} />
-          <p className="text-[10px] text-text-secondary font-noto mt-0.5">{item.updated}</p>
+          <p className="text-[10px] text-text-secondary font-noto mt-0.5">{formatUpdatedTime(item.updated, t)}</p>
         </div>
         {/* Expand indicator */}
         <motion.div
@@ -170,15 +218,15 @@ function CommodityCard({
               {/* 7-day chart */}
               <div>
                 <p className="font-poppins font-semibold text-text-primary text-xs mb-2">
-                  7-Day Price Trend (₹/{item.unit})
+                  {t('market.trend_title', { unit: t(`market.unit.${item.unit}`, item.unit) })}
                 </p>
                 <ResponsiveContainer width="100%" height={140}>
                   <LineChart data={trendData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#C8E6C9" />
-                    <XAxis dataKey="day" tick={{ fontSize: 10, fontFamily: 'Noto Sans' }} />
+                    <XAxis dataKey="day" tick={{ fontSize: 10, fontFamily: 'Noto Sans' }} tickFormatter={(day) => translateDay(day, t, currentLocale)} />
                     <YAxis tick={{ fontSize: 10, fontFamily: 'Noto Sans' }} />
                     <Tooltip
-                      formatter={(v: any) => [`₹${v.toLocaleString('en-IN')}`, item.name]}
+                      formatter={(v: any) => [`₹${v.toLocaleString('en-IN')}`, t(`crops.${getCropKey(item.name)}`, item.name)]}
                       contentStyle={{ fontFamily: 'Poppins', fontSize: 12, borderRadius: 8 }}
                     />
                     <Line
@@ -197,11 +245,11 @@ function CommodityCard({
               <div className="bg-surface-variant rounded-md p-3 flex gap-2">
                 <Robot size={18} weight="fill" className="text-primary shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-xs font-poppins font-semibold text-primary">AI Price Forecast</p>
+                  <p className="text-xs font-poppins font-semibold text-primary">{t('market.ai_forecast')}</p>
                   <p className="text-xs font-noto text-text-secondary mt-0.5">
                     {item.change >= 0
-                      ? `Prices expected to rise 5–8% next week based on reduced supply arrivals.`
-                      : `Prices may stabilise next week as market oversupply eases.`}
+                      ? t('market.forecast_up')
+                      : t('market.forecast_down')}
                   </p>
                 </div>
               </div>
@@ -209,7 +257,7 @@ function CommodityCard({
               {/* Nearby markets */}
               <div>
                 <p className="font-poppins font-semibold text-text-primary text-xs mb-2">
-                  Nearby Markets
+                  {t('market.nearby_markets')}
                 </p>
                 <div className="flex flex-col gap-1.5">
                   {nearbyMarkets.map((m) => (
@@ -218,8 +266,12 @@ function CommodityCard({
                       className="flex justify-between items-center bg-surface-variant rounded-sm px-3 py-2"
                     >
                       <div>
-                        <p className="font-noto text-xs text-text-primary font-semibold">{m.name}</p>
-                        <p className="text-[10px] text-text-secondary">{m.distance}</p>
+                        <p className="font-noto text-xs text-text-primary font-semibold">
+                          {m.name.replace(/\s*APMC/g, ` ${t('market.apmc_suffix', 'APMC')}`)}
+                        </p>
+                        <p className="text-[10px] text-text-secondary">
+                          {m.distance.replace(/\s*km/g, ` ${t('market.distance_unit', 'km')}`)}
+                        </p>
                       </div>
                       <p className="font-poppins font-bold text-sm text-text-primary">
                         ₹{(item.price + m.priceOffset).toLocaleString('en-IN')}
@@ -239,6 +291,7 @@ function CommodityCard({
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function MarketPage() {
+  const { t } = useTranslation();
   const farmer = useAppStore((s) => s.farmer);
   const district = farmer?.district ?? 'Dharwad';
   const state = farmer?.state ?? 'Karnataka';
@@ -311,9 +364,9 @@ export default function MarketPage() {
   }, [search, category, sortBy, prices]);
 
   const sortLabels: Record<SortKey, string> = {
-    name: 'By Name',
-    price: 'By Price',
-    change: 'By Change',
+    name: t('market.sort.name'),
+    price: t('market.sort.price'),
+    change: t('market.sort.change'),
   };
 
   return (
@@ -324,13 +377,12 @@ export default function MarketPage() {
         animate={{ opacity: 1, y: 0 }}
         className="mb-4"
       >
-        <h1 className="font-poppins font-bold text-2xl text-text-primary">📊 Market Prices</h1>
+        <h1 className="font-poppins font-bold text-2xl text-text-primary">{t('market.title')}</h1>
         <p className="text-text-secondary font-noto text-sm mt-0.5">
-          Live mandi rates • {district} APMC
+          {t('market.subtitle', { district })}
         </p>
       </motion.div>
 
-      {/* BUG 10: Show "Using cached data" when real API isn't available */}
       {priceError && (
         <motion.div
           initial={{ opacity: 0, y: -6 }}
@@ -338,7 +390,7 @@ export default function MarketPage() {
           className="mb-3 bg-amber-50 border border-amber-300 rounded-xl p-3 flex items-center gap-2 text-sm"
         >
           <span>📡</span>
-          <span className="font-noto text-amber-800">Using reference prices — live data unavailable.</span>
+          <span className="font-noto text-amber-800">{t('market.using_cached')}</span>
         </motion.div>
       )}
 
@@ -355,7 +407,7 @@ export default function MarketPage() {
         />
         <input
           type="text"
-          placeholder="Search commodities..."
+          placeholder={t('market.search_placeholder')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="input-field pl-10 pr-10"
@@ -388,7 +440,7 @@ export default function MarketPage() {
                   : 'bg-surface-variant text-text-secondary hover:text-primary hover:bg-surface-variant/80'
               }`}
             >
-              {cat}
+              {t(`market.categories.${cat}` as any)}
             </button>
           ))}
         </div>
@@ -445,9 +497,9 @@ export default function MarketPage() {
               className="card p-8 text-center"
             >
               <p className="text-4xl mb-3">🔍</p>
-              <p className="font-poppins font-semibold text-text-primary">No commodities found</p>
+              <p className="font-poppins font-semibold text-text-primary">{t('market.no_results')}</p>
               <p className="text-text-secondary font-noto text-sm mt-1">
-                Try a different search or category
+                {t('market.try_different')}
               </p>
             </motion.div>
           ) : (
@@ -472,7 +524,7 @@ export default function MarketPage() {
 
       {/* Last updated note */}
       <p className="text-center text-text-secondary font-noto text-xs mt-5">
-        Data from Karnataka APMC via data.gov.in • Refreshes every 6 hours
+        {t('market.data_source', { state })}
       </p>
     </PageWrapper>
   );

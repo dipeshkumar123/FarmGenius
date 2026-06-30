@@ -2,6 +2,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowClockwise, Clock, X } from 'phosphor-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 // ─────────────────────────────────────────────────────────────
 // Types
@@ -40,11 +41,15 @@ interface StaleDataBannerProps {
 // ─────────────────────────────────────────────────────────────
 // Helper
 // ─────────────────────────────────────────────────────────────
-function formatStaleDuration(minutes: number): string {
-  if (minutes < 1) return 'just now';
-  if (minutes < 60) return `${minutes} minute${minutes === 1 ? '' : 's'} ago`;
+function formatStaleDuration(minutes: number, t: any): string {
+  if (minutes < 1) return t('components.stale_banner.time.just_now', 'just now');
+  if (minutes < 60) {
+    if (minutes === 1) return t('components.stale_banner.time.minute', '1 minute ago');
+    return t('components.stale_banner.time.minutes', { count: minutes, defaultValue: `${minutes} minutes ago` });
+  }
   const hours = Math.round(minutes / 60);
-  return `${hours} hour${hours === 1 ? '' : 's'} ago`;
+  if (hours === 1) return t('components.stale_banner.time.hour', '1 hour ago');
+  return t('components.stale_banner.time.hours', { count: hours, defaultValue: `${hours} hours ago` });
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -78,6 +83,7 @@ export function StaleDataBanner({
   dismissible = true,
   className = '',
 }: StaleDataBannerProps) {
+  const { t } = useTranslation();
   const [isDismissed, setIsDismissed] = useState(false);
 
   const shouldShow = visible && !isDismissed;
@@ -103,7 +109,7 @@ export function StaleDataBanner({
           `}
           role="status"
           aria-live="polite"
-          aria-label="Stale data warning"
+          aria-label={t('components.stale_banner.aria_label_warning', 'Stale data warning')}
         >
           {/* Clock icon */}
           <motion.div
@@ -123,19 +129,18 @@ export function StaleDataBanner({
           {/* Text content */}
           <div className="flex-1 min-w-0">
             <p className="text-sm font-noto text-amber-800 leading-tight">
-              Showing cached data from{' '}
-              <span className="font-semibold">
-                {formatStaleDuration(staleSinceMinutes)}
-              </span>
-              .{' '}
+              {t('components.stale_banner.showing_cached', {
+                time: formatStaleDuration(staleSinceMinutes, t),
+                defaultValue: `Showing cached data from ${formatStaleDuration(staleSinceMinutes, t)}.`
+              })}{' '}
               <button
                 onClick={onRefresh}
                 disabled={isRefreshing}
                 className="underline underline-offset-2 font-semibold hover:text-amber-900
                            disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
-                aria-label="Refresh data now"
+                aria-label={t('components.stale_banner.aria_label_refresh_now', 'Refresh data now')}
               >
-                Tap to refresh.
+                {t('components.stale_banner.tap_refresh', 'Tap to refresh.')}
               </button>
             </p>
           </div>
@@ -148,7 +153,7 @@ export function StaleDataBanner({
                        font-poppins font-semibold bg-amber-200 text-amber-900
                        hover:bg-amber-300 active:scale-95 transition-all duration-200
                        disabled:opacity-60 disabled:cursor-not-allowed min-h-[32px]"
-            aria-label={isRefreshing ? 'Refreshing data…' : 'Refresh data'}
+            aria-label={isRefreshing ? t('components.stale_banner.aria_label_refreshing', 'Refreshing data…') : t('components.stale_banner.aria_label_refresh', 'Refresh data')}
           >
             <motion.span
               animate={{ rotate: isRefreshing ? 360 : 0 }}
@@ -160,7 +165,7 @@ export function StaleDataBanner({
             >
               <ArrowClockwise size={13} weight="bold" aria-hidden="true" />
             </motion.span>
-            {isRefreshing ? 'Updating…' : 'Refresh'}
+            {isRefreshing ? t('components.stale_banner.updating', 'Updating…') : t('components.stale_banner.refresh', 'Refresh')}
           </button>
 
           {/* Dismiss button */}
@@ -170,7 +175,7 @@ export function StaleDataBanner({
               className="shrink-0 flex items-center justify-center w-7 h-7 rounded-full
                          text-amber-600 hover:bg-amber-200 active:scale-90
                          transition-all duration-200"
-              aria-label="Dismiss stale data warning"
+              aria-label={t('components.stale_banner.aria_label_dismiss', 'Dismiss stale data warning')}
             >
               <X size={14} weight="bold" />
             </button>
@@ -199,6 +204,7 @@ export function StaleIndicator({
   onRefresh,
   className = '',
 }: StaleIndicatorProps) {
+  const { t } = useTranslation();
   return (
     <motion.button
       initial={{ opacity: 0, scale: 0.9 }}
@@ -210,10 +216,14 @@ export function StaleIndicator({
                  bg-amber-100 text-amber-700 text-xs font-poppins font-semibold
                  cursor-pointer hover:bg-amber-200 transition-colors duration-150 ${className}`}
       disabled={!onRefresh}
-      aria-label={`Data is ${formatStaleDuration(staleSinceMinutes)} old. ${onRefresh ? 'Tap to refresh.' : ''}`}
+      aria-label={t('components.stale_banner.aria_label_indicator', {
+        time: formatStaleDuration(staleSinceMinutes, t),
+        action: onRefresh ? t('components.stale_banner.tap_refresh', 'Tap to refresh.') : '',
+        defaultValue: `Data is ${formatStaleDuration(staleSinceMinutes, t)} old. ${onRefresh ? 'Tap to refresh.' : ''}`
+      })}
     >
       <Clock size={11} weight="fill" />
-      {formatStaleDuration(staleSinceMinutes)}
+      {formatStaleDuration(staleSinceMinutes, t)}
       {onRefresh && <ArrowClockwise size={11} weight="bold" />}
     </motion.button>
   );

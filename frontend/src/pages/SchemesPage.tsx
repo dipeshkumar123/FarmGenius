@@ -5,25 +5,20 @@ import { MagnifyingGlass, CheckCircle, ArrowRight, Spinner } from 'phosphor-reac
 import { motion } from 'framer-motion';
 import apiClient from '../api/client';
 import { useAppStore } from '../store/appStore';
-
-const mockSchemes = [
-  { id: 1, name: 'PM-KISAN', fullName: 'Pradhan Mantri Kisan Samman Nidhi', category: 'Direct Benefit', amount: '₹6,000/year', eligibility: 'Small & marginal farmers with less than 2 hectares', deadline: 'Ongoing', color: '#FF6B35', emoji: '🏛️', description: 'Direct income support to eligible farmer families in 3 equal installments.', applyLink: 'https://pmkisan.gov.in' },
-  { id: 2, name: 'PMFBY', fullName: 'Pradhan Mantri Fasal Bima Yojana', category: 'Crop Insurance', amount: 'Up to full coverage', eligibility: 'All farmers growing notified crops', deadline: 'Before sowing', color: '#2196F3', emoji: '🛡️', description: 'Crop insurance scheme providing financial support if crops fail due to natural calamities.', applyLink: 'https://pmfby.gov.in' },
-  { id: 3, name: 'KCC', fullName: 'Kisan Credit Card', category: 'Credit/Loans', amount: 'Up to ₹3 lakh @ 7%', eligibility: 'All farmers, tenant farmers, sharecroppers', deadline: 'Ongoing', color: '#9C27B0', emoji: '💳', description: 'Short-term credit needs for cultivation and allied activities at subsidized interest rates.', applyLink: 'https://www.nabard.org/kisan-credit-card' },
-  { id: 4, name: 'PMKSY', fullName: 'PM Krishi Sinchayee Yojana', category: 'Irrigation', amount: '55% subsidy', eligibility: 'Individual farmers, farmer groups', deadline: 'State-wise', color: '#00BCD4', emoji: '💧', description: 'Micro-irrigation subsidy scheme for drip and sprinkler irrigation systems.', applyLink: 'https://pmksy.gov.in' },
-  { id: 5, name: 'eNAM', fullName: 'National Agriculture Market', category: 'Market Access', amount: 'Free platform', eligibility: 'Any registered farmer', deadline: 'Ongoing', color: '#4CAF50', emoji: '🏪', description: 'Online trading portal for farmers to sell produce directly to buyers across India.', applyLink: 'https://www.enam.gov.in' },
-];
+import { useTranslation } from 'react-i18next';
+import { localizeNumber } from '../utils/localization';
 
 const categories = ['All', 'Direct Benefit', 'Crop Insurance', 'Credit/Loans', 'Irrigation', 'Market Access', 'Government'];
 
 export default function SchemesPage() {
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
   const farmer = useAppStore((s) => s.farmer);
   const isOffline = useAppStore((s) => s.isOffline);
 
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
-  const [schemes, setSchemes] = useState<any[]>(mockSchemes);
+  const [schemes, setSchemes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -38,21 +33,20 @@ export default function SchemesPage() {
           id: `live-${idx}`,
           name: item.scheme_name,
           fullName: item.scheme_name,
-          category: 'Government',
-          amount: 'Check details on portal',
+          category: item.category || 'Government',
+          amount: item.amount || t('schemes.portal'),
           eligibility: item.eligibility,
-          deadline: 'Check website',
+          deadline: t('schemes.website'),
           color: '#2E7D32',
           emoji: '🏛️',
           description: item.description,
           applyLink: item.link
         }));
 
-        // Merge mock and live, or just replace. Let's merge them so the UI looks fuller
-        setSchemes([...liveSchemes, ...mockSchemes]);
+        setSchemes(liveSchemes);
       } catch (error) {
         console.error("Error fetching schemes", error);
-        setSchemes(mockSchemes);
+        setSchemes([]);
       } finally {
         setLoading(false);
       }
@@ -61,7 +55,7 @@ export default function SchemesPage() {
     if (!isOffline) {
       fetchSchemes();
     } else {
-      setSchemes(mockSchemes);
+      setSchemes([]);
       setLoading(false);
     }
   }, [farmer?.state, isOffline]);
@@ -72,11 +66,19 @@ export default function SchemesPage() {
     return matchesSearch && matchesCategory;
   });
 
+  const handleApply = (link: string) => {
+    if (link && (link.startsWith('http://') || link.startsWith('https://'))) {
+      window.open(link, '_blank', 'noopener,noreferrer');
+    } else {
+      alert(t('schemes.portal')); // Fallback message if link is missing or invalid
+    }
+  };
+
   return (
     <PageWrapper className="p-4 pb-24 bg-[#F1F8E9]">
       <AnimatedSection custom={0} className="mb-5">
-        <h1 className="text-2xl font-poppins font-bold text-[#1B2B1D] mb-1">Government Schemes</h1>
-        <p className="text-sm text-[#546E7A]">Discover agricultural subsidies and financial support.</p>
+        <h1 className="text-2xl font-poppins font-bold text-[#1B2B1D] mb-1">{t('schemes.title')}</h1>
+        <p className="text-sm text-[#546E7A]">{t('schemes.subtitle')}</p>
       </AnimatedSection>
 
       <AnimatedSection custom={1} className="mb-5">
@@ -84,7 +86,7 @@ export default function SchemesPage() {
           <MagnifyingGlass size={20} className="absolute left-3 top-3 text-[#546E7A]" />
           <input 
             type="text" 
-            placeholder="Search schemes..." 
+            placeholder={t('schemes.search')} 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full bg-white p-3 pl-10 rounded-xl outline-none text-[#1B2B1D] border border-gray-200 focus:border-[#2E7D32] focus:ring-2 focus:ring-[#2E7D32]/20 transition-all shadow-sm"
@@ -104,7 +106,7 @@ export default function SchemesPage() {
                   : 'bg-white text-[#546E7A] border-gray-200 hover:border-[#2E7D32] hover:text-[#2E7D32]'
               }`}
             >
-              {cat}
+              {t(`schemes.categories.${cat}` as any)}
             </button>
           ))}
         </div>
@@ -113,7 +115,7 @@ export default function SchemesPage() {
       {loading ? (
         <div className="flex justify-center items-center py-10 text-[#2E7D32]">
           <Spinner className="animate-spin" size={32} />
-          <span className="ml-3 font-medium">Loading live schemes...</span>
+          <span className="ml-3 font-medium">{t('schemes.loading')}</span>
         </div>
       ) : (
         <div className="space-y-4">
@@ -127,7 +129,9 @@ export default function SchemesPage() {
                         <span className="text-2xl" aria-hidden="true">{scheme.emoji}</span>
                         <div>
                           <h2 className="font-poppins font-bold text-[#1B2B1D] leading-tight">{scheme.name}</h2>
-                          <span className="text-xs font-medium px-2 py-0.5 rounded bg-gray-100 text-gray-600 inline-block mt-1">{scheme.category}</span>
+                          <span className="text-xs font-medium px-2 py-0.5 rounded bg-gray-100 text-gray-600 inline-block mt-1">
+                            {t(`schemes.categories.${scheme.category}` as any, { defaultValue: scheme.category })}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -136,11 +140,13 @@ export default function SchemesPage() {
                     
                     <div className="bg-[#F1F8E9] rounded-xl p-3 grid grid-cols-1 gap-2 mb-4">
                       <div className="flex justify-between items-center text-sm">
-                        <span className="text-[#546E7A]">Benefit:</span>
-                        <span className="font-semibold text-[#2E7D32]">{scheme.amount}</span>
+                        <span className="text-[#546E7A]">{t('schemes.benefit')}</span>
+                        <span className="font-semibold text-[#2E7D32]">
+                          {typeof scheme.amount === 'string' ? scheme.amount.replace(/[\d,]+/g, (match: string) => localizeNumber(parseInt(match.replace(/,/g, ''), 10), i18n.language)) : scheme.amount}
+                        </span>
                       </div>
                       <div className="flex justify-between items-start text-sm">
-                        <span className="text-[#546E7A] whitespace-nowrap mr-2">Eligibility:</span>
+                        <span className="text-[#546E7A] whitespace-nowrap mr-2">{t('schemes.eligibility')}</span>
                         <span className="font-medium text-[#1B2B1D] text-right">{scheme.eligibility}</span>
                       </div>
                     </div>
@@ -150,20 +156,24 @@ export default function SchemesPage() {
                         onClick={() =>
                           navigate('/chat', {
                             state: {
-                              prefill: `Am I eligible for ${scheme.name} (${scheme.fullName})? My farm is in ${farmer?.state || 'Karnataka'}.`,
+                              prefill: t('schemes.chat_prefill', {
+                                name: scheme.name,
+                                fullName: scheme.fullName,
+                                state: farmer?.state || 'Karnataka'
+                              }),
                             },
                           })
                         }
                         className="flex-1 py-2.5 border border-[#2E7D32] text-[#2E7D32] rounded-xl text-sm font-medium hover:bg-[#E8F5E9] transition-colors flex justify-center items-center"
                       >
                         <CheckCircle weight="fill" className="mr-1.5" size={18} />
-                        Check Eligibility
+                        {t('schemes.check_eligibility')}
                       </button>
                       <button
-                        onClick={() => window.open(scheme.applyLink, '_blank', 'noopener,noreferrer')}
+                        onClick={() => handleApply(scheme.applyLink)}
                         className="flex-1 py-2.5 bg-[#2E7D32] text-white rounded-xl text-sm font-medium hover:bg-[#1B5E20] transition-colors flex justify-center items-center shadow-md shadow-[#2E7D32]/20"
                       >
-                        Apply Now
+                        {t('schemes.apply_now')}
                         <ArrowRight weight="bold" className="ml-1.5" size={16} />
                       </button>
                     </div>
@@ -174,8 +184,8 @@ export default function SchemesPage() {
           ) : (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-10">
               <div className="text-4xl mb-3">🔍</div>
-              <h3 className="text-lg font-medium text-[#1B2B1D]">No schemes found</h3>
-              <p className="text-[#546E7A]">Try adjusting your search or category filter</p>
+              <h3 className="text-lg font-medium text-[#1B2B1D]">{t('schemes.no_schemes')}</h3>
+              <p className="text-[#546E7A]">{t('schemes.try_adjusting')}</p>
             </motion.div>
           )}
         </div>

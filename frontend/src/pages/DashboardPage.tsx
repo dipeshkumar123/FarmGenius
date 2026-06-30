@@ -21,9 +21,11 @@ import {
   ArrowDown,
   Minus,
 } from 'phosphor-react';
+import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../store/appStore';
 import PageWrapper from '../components/ui/PageWrapper';
 import apiClient from '../api/client';
+import { localizeNumber } from '../utils/localization';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -71,10 +73,17 @@ const MOCK_PRICES: PriceCard[] = [
   { id: '5', crop: 'Cotton',  emoji: '🌿', price: 6150, unit: '₹/qtl', change: -2 },
 ];
 
-const MOCK_ACTIVITY: ActivityItem[] = [
-  { id: '1', icon: 'ai',    text: 'AI advised wheat irrigation schedule',         timeAgo: '2h ago' },
-  { id: '2', icon: 'scan',  text: 'Tomato Late Blight detected — 94% confidence', timeAgo: '1d ago' },
-  { id: '3', icon: 'price', text: 'Wheat prices checked for Dharwad APMC',        timeAgo: '2d ago' },
+interface MockActivityItem {
+  id: string;
+  icon: 'ai' | 'scan' | 'price';
+  textKey: string;
+  timeKey: string;
+}
+
+const MOCK_ACTIVITY: MockActivityItem[] = [
+  { id: '1', icon: 'ai',    textKey: 'dashboard_activities.ai_advised',         timeKey: 'dashboard_activities.time_2h' },
+  { id: '2', icon: 'scan',  textKey: 'dashboard_activities.tomato_detected', timeKey: 'dashboard_activities.time_1d' },
+  { id: '3', icon: 'price', textKey: 'dashboard_activities.wheat_prices_checked',        timeKey: 'dashboard_activities.time_2d' },
 ];
 
 interface QuickAction {
@@ -88,22 +97,13 @@ interface QuickAction {
 }
 
 const QUICK_ACTIONS: QuickAction[] = [
-  { id: 'crops',   emoji: '🌱', label: 'Crop Advice',    desc: 'Sowing & care',      route: '/crops',   colorFrom: '#2E7D32', colorTo: '#60AD5E' },
-  { id: 'scan',    emoji: '🔬', label: 'Scan Disease',   desc: 'Photo diagnosis',    route: '/scan',    colorFrom: '#1565C0', colorTo: '#42A5F5' },
-  { id: 'chat',    emoji: '💬', label: 'Ask AI',         desc: 'Any question',       route: '/chat',    colorFrom: '#6A1B9A', colorTo: '#AB47BC' },
-  { id: 'market',  emoji: '📈', label: 'Market Prices',  desc: 'Live mandi rates',   route: '/market',  colorFrom: '#E65100', colorTo: '#FF8A65' },
-  { id: 'weather', emoji: '☁️', label: 'Weather',        desc: '7-day forecast',     route: '/weather', colorFrom: '#006064', colorTo: '#26C6DA' },
-  { id: 'schemes', emoji: '🏛️', label: 'Schemes',        desc: 'Govt benefits',      route: '/schemes', colorFrom: '#558B2F', colorTo: '#8BC34A' },
+  { id: 'crops',   emoji: '🌱', label: 'dashboard.actions.crop_advice',    desc: 'dashboard.actions.crop_desc',      route: '/crops',   colorFrom: '#2E7D32', colorTo: '#60AD5E' },
+  { id: 'scan',    emoji: '🔬', label: 'dashboard.actions.scan_disease',   desc: 'dashboard.actions.scan_desc',    route: '/scan',    colorFrom: '#1565C0', colorTo: '#42A5F5' },
+  { id: 'chat',    emoji: '💬', label: 'dashboard.actions.ask_ai',         desc: 'dashboard.actions.ask_desc',       route: '/chat',    colorFrom: '#6A1B9A', colorTo: '#AB47BC' },
+  { id: 'market',  emoji: '📈', label: 'dashboard.actions.market_prices',  desc: 'dashboard.actions.market_desc',   route: '/market',  colorFrom: '#E65100', colorTo: '#FF8A65' },
+  { id: 'weather', emoji: '☁️', label: 'dashboard.actions.weather',        desc: 'dashboard.actions.weather_desc',     route: '/weather', colorFrom: '#006064', colorTo: '#26C6DA' },
+  { id: 'schemes', emoji: '🏛️', label: 'dashboard.actions.schemes',        desc: 'dashboard.actions.schemes_desc',      route: '/schemes', colorFrom: '#558B2F', colorTo: '#8BC34A' },
 ];
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function getGreeting(): string {
-  const h = new Date().getHours();
-  if (h < 12) return 'Good morning';
-  if (h < 17) return 'Good afternoon';
-  return 'Good evening';
-}
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -127,28 +127,25 @@ function WeatherCardSkeleton() {
   );
 }
 
-interface PriceChangeBadgeProps {
-  change: number;
-}
-function PriceChangeBadge({ change }: PriceChangeBadgeProps) {
+function PriceChangeBadge({ change, lang }: { change: number, lang: string }) {
   if (change > 0)
     return (
       <span className="inline-flex items-center gap-0.5 text-xs font-poppins font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
         <ArrowUp size={10} weight="bold" />
-        {change}%
+        {localizeNumber(change, lang)}%
       </span>
     );
   if (change < 0)
     return (
       <span className="inline-flex items-center gap-0.5 text-xs font-poppins font-semibold text-red-700 bg-red-50 px-2 py-0.5 rounded-full">
         <ArrowDown size={10} weight="bold" />
-        {Math.abs(change)}%
+        {localizeNumber(Math.abs(change), lang)}%
       </span>
     );
   return (
     <span className="inline-flex items-center gap-0.5 text-xs font-poppins font-semibold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
       <Minus size={10} weight="bold" />
-      0%
+      {localizeNumber(0, lang)}%
     </span>
   );
 }
@@ -211,13 +208,21 @@ const slideInRight = {
 
 export default function DashboardPage() {
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
   const farmer = useAppStore((s) => s.farmer);
   const isOffline = useAppStore((s) => s.isOffline);
 
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [weatherLoading, setWeatherLoading] = useState(true);
   const [prices] = useState<PriceCard[]>(MOCK_PRICES);
-  const [notifCount] = useState(2);
+  const notifCount = 2;
+
+  const getGreeting = () => {
+    const h = new Date().getHours();
+    if (h < 12) return t('dashboard.good_morning');
+    if (h < 17) return t('dashboard.good_afternoon');
+    return t('dashboard.good_evening');
+  };
 
   const farmerName = farmer?.name ?? 'Ramesh';
   const district    = farmer?.district ?? 'Dharwad';
@@ -342,7 +347,7 @@ export default function DashboardPage() {
                   <div className="space-y-1">
                     <div className="flex items-end gap-1">
                       <span className="text-5xl font-poppins font-bold text-white leading-none">
-                        {weather.temp}°
+                        {localizeNumber(weather.temp, i18n.language)}°
                       </span>
                       <span className="text-lg font-poppins text-white/80 mb-1">C</span>
                     </div>
@@ -352,11 +357,11 @@ export default function DashboardPage() {
                     <div className="flex items-center gap-4 mt-2">
                       <span className="flex items-center gap-1 text-white/80 text-sm font-noto">
                         <Drop size={14} weight="fill" />
-                        {weather.humidity}%
+                        {localizeNumber(weather.humidity, i18n.language)}%
                       </span>
                       <span className="flex items-center gap-1 text-white/80 text-sm font-noto">
                         <Wind size={14} weight="fill" />
-                        {weather.windKph} km/h
+                        {localizeNumber(weather.windKph, i18n.language)} km/h
                       </span>
                     </div>
                   </div>
@@ -389,7 +394,7 @@ export default function DashboardPage() {
 
                 {/* Tap cue */}
                 <div className="absolute bottom-4 right-5 flex items-center gap-1 text-white/60 text-xs font-noto">
-                  See forecast <CaretRight size={12} />
+                  {t('dashboard.see_forecast')} <CaretRight size={12} />
                 </div>
               </motion.div>
             ) : (
@@ -403,7 +408,7 @@ export default function DashboardPage() {
                   onClick={fetchWeather}
                   className="text-white font-noto text-sm underline"
                 >
-                  Failed to load weather — tap to retry
+                  {t('dashboard.failed_weather')}
                 </button>
               </motion.div>
             )}
@@ -417,7 +422,7 @@ export default function DashboardPage() {
           initial="hidden"
           animate="visible"
         >
-          <h2 className="section-title mb-3">Quick Actions</h2>
+          <h2 className="section-title mb-3">{t('dashboard.quick_actions')}</h2>
           <motion.div
             variants={cardStagger}
             initial="hidden"
@@ -444,10 +449,10 @@ export default function DashboardPage() {
                   {action.emoji}
                 </div>
                 <span className="font-poppins font-semibold text-sm text-text-primary leading-tight">
-                  {action.label}
+                  {t(action.label)}
                 </span>
                 <span className="font-noto text-xs text-text-secondary">
-                  {action.desc}
+                  {t(action.desc)}
                 </span>
               </motion.button>
             ))}
@@ -462,12 +467,12 @@ export default function DashboardPage() {
           animate="visible"
         >
           <div className="flex items-center justify-between mb-3">
-            <h2 className="section-title">Today's Mandi Prices</h2>
+            <h2 className="section-title">{t('dashboard.mandi_prices')}</h2>
             <button
               onClick={() => navigate('/market')}
               className="flex items-center gap-0.5 text-primary text-sm font-poppins font-semibold hover:underline"
             >
-              View all <CaretRight size={14} weight="bold" />
+              {t('dashboard.view_all')} <CaretRight size={14} weight="bold" />
             </button>
           </div>
 
@@ -487,13 +492,13 @@ export default function DashboardPage() {
               >
                 <div className="text-2xl mb-1">{p.emoji}</div>
                 <p className="font-poppins font-semibold text-text-primary text-sm leading-tight">
-                  {p.crop}
+                  {t(`crops.${p.crop.toLowerCase()}` as any, { defaultValue: p.crop })}
                 </p>
                 <p className="font-poppins font-bold text-base text-text-primary mt-0.5">
-                  ₹{p.price.toLocaleString('en-IN')}
+                  ₹{localizeNumber(p.price, i18n.language)}
                 </p>
                 <p className="font-noto text-[10px] text-text-secondary mb-1.5">{p.unit}</p>
-                <PriceChangeBadge change={p.change} />
+                <PriceChangeBadge change={p.change} lang={i18n.language} />
               </motion.div>
             ))}
           </div>
@@ -522,11 +527,10 @@ export default function DashboardPage() {
 
             <div className="flex-1 min-w-0">
               <h3 className="font-poppins font-bold text-amber-900 text-sm">
-                🚨 Pest Advisory — Your Region
+                🚨 {t('dashboard.pest_advisory')}
               </h3>
               <p className="font-noto text-amber-800 text-sm mt-1 leading-relaxed">
-                High aphid risk detected in {district} district this week.
-                Check your wheat and tomato crops.
+                {t('dashboard.pest_desc', { district })}
               </p>
               <motion.button
                 whileHover={{ scale: 1.04 }}
@@ -536,7 +540,7 @@ export default function DashboardPage() {
                            font-poppins font-semibold text-sm px-4 py-2 rounded-full
                            shadow-accent hover:bg-accent-dark transition-colors duration-200"
               >
-                Learn More
+                {t('dashboard.learn_more')}
                 <CaretRight size={14} weight="bold" />
               </motion.button>
             </div>
@@ -551,7 +555,7 @@ export default function DashboardPage() {
           animate="visible"
           className="pb-4"
         >
-          <h2 className="section-title mb-3">Recent Activity</h2>
+          <h2 className="section-title mb-3">{t('dashboard.recent_activity')}</h2>
 
           <div className="bg-white rounded-md shadow-card overflow-hidden divide-y divide-farm-divider">
             {MOCK_ACTIVITY.map((item, i) => (
@@ -566,11 +570,11 @@ export default function DashboardPage() {
                 <ActivityIcon type={item.icon} />
                 <div className="flex-1 min-w-0">
                   <p className="font-noto text-sm text-text-primary leading-snug truncate">
-                    {item.text}
+                    {t(item.textKey)}
                   </p>
                 </div>
                 <span className="font-noto text-xs text-text-secondary flex-shrink-0 ml-2">
-                  {item.timeAgo}
+                  {t(item.timeKey)}
                 </span>
               </motion.div>
             ))}

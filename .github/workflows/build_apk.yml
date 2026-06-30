@@ -31,8 +31,7 @@ jobs:
           flutter-version: '3.24.0' # Updated to support Gradle 8+ / AGP 8+
 
       - name: Generate Native Scaffolding
-        run: |
-          flutter create .
+        run: echo "Using checked-in native Android configuration"
         working-directory: ./app
 
       - name: Install Dependencies
