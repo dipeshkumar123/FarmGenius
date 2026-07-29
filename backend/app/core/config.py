@@ -1,8 +1,8 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
-    SUPABASE_URL: str = ""
-    SUPABASE_SERVICE_KEY: str = ""
+    SUPABASE_URL: str = "https://kwnnugqhuwacoeltaldq.supabase.co"
+    SUPABASE_SERVICE_KEY: str = "sb_publishable_V9hBXq3oQeF9mVtTHNFucQ_bvzn_kVN"
     # JWT Secret from Supabase Dashboard → Settings → API → JWT Secret
     SUPABASE_JWT_SECRET: str = ""
     DATABASE_URL: str = ""
